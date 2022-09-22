@@ -4,6 +4,7 @@ import {tableGeometry, playerPartition, cardPartition} from '../../config'
 import OpenSeat from './OpenSeat'
 import Player from './Player'
 import Hand from './Hand'
+import RiskMap from './RiskMap'
 
 
 function Table(props){
@@ -99,7 +100,7 @@ function Table(props){
         }
     }
     return (
-        <div className={classes.gameTable} style={boundingRect} id="game-table">
+        <RiskMap className={classes.gameTable} style={boundingRect} id="game-table">
             {players.map((player) => {
                     return (<Fragment>
                         <Player key={`player-${player.position}`} data={player} generatePosition={playerPosition}/>
@@ -109,7 +110,7 @@ function Table(props){
                 })
             }
             {openSeatButtons}
-        </div>
+        </RiskMap>
     )
 }
 

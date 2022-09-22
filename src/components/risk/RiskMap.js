@@ -1,7 +1,7 @@
-import riskboard from "../RiskBoard.svg"
+import riskboard from "../../RiskBoard.svg"
 import { useEffect } from "react"
 import * as React from "react"
-import { isInsidePolygon } from "../helpers/helpers"
+import { isInsidePolygon } from "../../helpers/helpers"
 
 
 
@@ -19,7 +19,7 @@ const RiskMap = (props) => {
   }, [])
 
   return (
-  <div id="RiskMap" onClick = {determineCountry} />
+  <div id="RiskMap" onClick = {determineCountry}>{props.children}</div>
 )
 }
 

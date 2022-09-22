@@ -18,7 +18,7 @@ function Game(props){
     const webworker = useLoaderData();
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
-
+    /*
     useEffect(()=>{
         const fetchPlayers = async () => {
           const new_players = []
@@ -36,6 +36,7 @@ function Game(props){
         }
         fetchPlayers()
     }, [])
+    */
     
     function stateReducer(prevState, action){
         switch(action.type){
@@ -107,7 +108,20 @@ export async function loader({ params }){
             
         //}
         //return worker
-        return null
+        const sock = new WebSocket("ws://localhost:3001/gamesession")
+        sock.onopen = ()=>{
+            const payload = JSON.stringify({type: "Greetings!"})
+            sock.send(payload)
+        }
+        sock.onerror = (e)=>{
+            console.log(e.message)
+        }
+        sock.onclose = ()=>{
+        }
+        sock.onmessage = (message)=>{
+            const payload = message.data
+        }
+        return sock
     } catch (error){
         throw redirect("/")
     }
