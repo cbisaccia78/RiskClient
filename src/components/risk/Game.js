@@ -13,9 +13,10 @@ import { Deck } from '../../helpers/Deck'
 
 function Game(props){
 
-    const [gameState, dispatchState] = useReducer(stateReducer, props.players, generateInitialState)
+    const [gameState, dispatchState] = useReducer(stateReducer, { playerList: [], freeSpotsList: [], deck: null, positionTurn: 0 })
+
     const [players, setPlayers] = useState([])
-    const webworker = useLoaderData();
+    const websocket = useLoaderData();
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
     /*
@@ -49,7 +50,7 @@ function Game(props){
         }
     }
 
-    function generateInitialState(_players){
+    function generateInitialState(_players){ //this needs to come from the server
         var playerList = []
         var freeSpots = range(0,8)
         _players.forEach((player) => {
