@@ -19,7 +19,7 @@ export default function(){
         */
        <Navbar bg={themectx.currentTheme} expand="lg">
             <Container>
-                <Navbar.Brand href="#home">Poker</Navbar.Brand>
+                <Navbar.Brand href="#home">Risky</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">

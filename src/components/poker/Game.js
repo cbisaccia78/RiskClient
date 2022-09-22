@@ -23,7 +23,7 @@ function Game(props){
         const fetchPlayers = async () => {
           const new_players = []
           try{
-            const response = await fetch(`http://localhost:3001/${}`)
+            const response = await fetch(`http://localhost:3001`)
             const responseData = await response.json()
             for (const key in responseData){
                 new_players.push(responseData[key])
@@ -101,12 +101,13 @@ export async function loader({ params }){
     //create webworker which manages a
         // websocket() interface with websocket server
     try {
-        worker = new Worker("gameWorker.js")
-        worker.postMessage(gameId)
-        worker.onmessage = function(message){
+        //const worker = new Worker("gameWorker.js")
+        //worker.postMessage(gameId)
+        //worker.onmessage = function(message){
             
-        }
-        return Worker
+        //}
+        //return worker
+        return null
     } catch (error){
         throw redirect("/")
     }
