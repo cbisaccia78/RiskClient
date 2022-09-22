@@ -1,0 +1,20 @@
+change values for pieces?
+
+horses are good in certain countries, bad on others? applies to other pieces too
+
+new pieces (sea units?)
+
+buy countries?
+
+assigned attributes for country? (random or determined) 
+	attacking australia, can only attack with 2 die?
+	
+modify win conditions
+
+formalize/enforce diplomacy, penalize diplomacy rating for betrayal
+
+live or turn based?
+
+pve / treasure opportunities
+
+imperfect vision information
