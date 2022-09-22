@@ -19,7 +19,7 @@ function Game(props){
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
     /*
-    useEffect(()=>{
+    useEffect(function(){
         const new_players = []
         const sock = new WebSocket("ws://localhost:3001/gamesession/1/1")// hardcoded gameid and userid, need to get dynamically
         sock.onopen = ()=>{
@@ -31,12 +31,14 @@ function Game(props){
         }
         sock.onclose = ()=>{
         }
+
         sock.onmessage = function(message){
             const payload = message.data
             this.dispatchState(payload ? JSON.parse(payload) : {type: "NoAct"})//this should be in the context of <Game>
-        }
+        }.bind(this)
+
         return sock
-    }, [])
+    }.bind(this), [])
     */
     
     function stateReducer(prevState, action){
