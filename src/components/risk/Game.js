@@ -50,7 +50,8 @@ function Game(props){
         }
     }
 
-    function generateInitialState(_players){ //this needs to come from the server
+    async function generateInitialState(_players){ //this needs to come from the server
+        websocket.send(JSON.stringify({action: "getInitialState"}))
         var playerList = []
         var freeSpots = range(0,8)
         _players.forEach((player) => {
@@ -119,8 +120,9 @@ export async function loader({ params }){
         }
         sock.onclose = ()=>{
         }
-        sock.onmessage = (message)=>{
+        sock.onmessage = function(message){
             const payload = message.data
+            this.dispatchState(payload ? JSON.parse(payload) : {action: "NoAct"})//this should be in the context of <Game>
         }
         return sock
     } catch (error){

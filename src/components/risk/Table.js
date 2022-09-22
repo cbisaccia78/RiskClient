@@ -1,11 +1,22 @@
 import classes from './Table.module.css'
 import React, {useState, useEffect, Fragment} from 'react'
 import {tableGeometry, playerPartition, cardPartition} from '../../config'
+import riskboard from "../../RiskBoard.svg"
+import { isInsidePolygon } from "../../helpers/helpers"
 import OpenSeat from './OpenSeat'
 import Player from './Player'
 import Hand from './Hand'
-import RiskMap from './RiskMap'
 
+const determineCountry = (evt) => {
+  /*const { mouseX, mouseY } = evt.getXY // need to find actual method
+    for each country
+        if isInsidePolygon(country, mouseX, mouseY)
+            return country.name
+    return "none"  
+  
+  */
+    return null;
+}
 
 function Table(props){
     let players = props.players
@@ -24,15 +35,23 @@ function Table(props){
         }
     })
 
+    useEffect(()=>{
+        let img = document.createElement("img")
+        img.src = riskboard
+        img.className = "gameSVG"
+        const t = document.getElementById("game-table")
+        t.appendChild(img)
+      }, [])
+
     function calculateBB(){
-        //this needs to ensure that 16:9 ratio does not break
+        //this needs to ensure that 1.444549393267134 ratio does not break
         let vpW = window.visualViewport.width
         let vpH = window.visualViewport.height
         let ratio = vpW / vpH
-        if(ratio < 16/9){ //reduce the height
-            vpH = vpW * (9/16) 
+        if(ratio < 1.444549393267134){ //reduce the height
+            vpH = vpW * (1/1.444549393267134) 
         }else{ //reduce the width
-            vpW = (16/9) * vpH
+            vpW = (1.444549393267134) * vpH
         }
         return {
             height: tableGeometry.height*vpH,
@@ -45,18 +64,6 @@ function Table(props){
     function playerPosition(position){
         /*
         playerCircles defined to be 10% of viewportHeight
-
-        set origin of playerCircle to be 7.5 % of ViewportHeight perpendicular distance from ellipse at spot indicated by position
-        position will partition the ellipse into 8 equal circumference length to seperate the players.
-        
-        pseudo:
-        define equation for nth arc of partitioned ellipse given arclength = circumference / 8
-        set (x_0, y_0) = midpoint of arc
-        define equation of line perpendicular to (x_0, y_0) with length of 15% of viewportHeight
-        set (x_f, y_f) = midpoint of line
-        
-        next we must derive top and left values from this x_f, y_f
-
 
         */
         let real_height = boundingRect.height / 0.7
@@ -100,7 +107,7 @@ function Table(props){
         }
     }
     return (
-        <RiskMap className={classes.gameTable} style={boundingRect} id="game-table">
+        <div className={classes.gameTable} style={boundingRect} id="game-table" onClick = {determineCountry}>
             {players.map((player) => {
                     return (<Fragment>
                         <Player key={`player-${player.position}`} data={player} generatePosition={playerPosition}/>
@@ -110,7 +117,7 @@ function Table(props){
                 })
             }
             {openSeatButtons}
-        </RiskMap>
+        </div>
     )
 }
 

@@ -1,4 +1,3 @@
-import boardsvg from './RiskBoard.svg'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import React from 'react';
@@ -14,7 +13,6 @@ import { AuthContextProvider } from './store/auth-context';
 import { ThemeContextProvider } from './store/theme-context';
 
 import { createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom';
-import RiskMap from './components/risk/RiskMap';
 //import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
