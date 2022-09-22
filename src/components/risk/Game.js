@@ -16,42 +16,43 @@ function Game(props){
     const [gameState, dispatchState] = useReducer(stateReducer, { playerList: [], freeSpotsList: [], deck: null, positionTurn: 0 })
 
     const [players, setPlayers] = useState([])
-    const websocket = useLoaderData();
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
     /*
     useEffect(()=>{
-        const fetchPlayers = async () => {
-          const new_players = []
-          try{
-            const response = await fetch(`http://localhost:3001`)
-            const responseData = await response.json()
-            for (const key in responseData){
-                new_players.push(responseData[key])
-            }
-          } catch (err){
-            console.log("failed to fetch")
-          }
-          
-          setPlayers(new_players)
+        const new_players = []
+        const sock = new WebSocket("ws://localhost:3001/gamesession/1/1")// hardcoded gameid and userid, need to get dynamically
+        sock.onopen = ()=>{
+            const payload = JSON.stringify({type: "getInitialState"})
+            sock.send(payload)
         }
-        fetchPlayers()
+        sock.onerror = (e)=>{
+            console.log(e.message)
+        }
+        sock.onclose = ()=>{
+        }
+        sock.onmessage = function(message){
+            const payload = message.data
+            this.dispatchState(payload ? JSON.parse(payload) : {type: "NoAct"})//this should be in the context of <Game>
+        }
+        return sock
     }, [])
     */
     
     function stateReducer(prevState, action){
         switch(action.type){
-            case 'new_player':
+            case 'INITIALIZE_GAME':
+                return generateInitialState(action.data.playerList)
+            case 'NEW_PLAYER':
                 return addNewPlayer(prevState, action.player, action.new_position)
-            case 'turn_switch':
+            case 'TURN_SWITCH':
                 return
             default:
                 throw new Error()
         }
     }
 
-    async function generateInitialState(_players){ //this needs to come from the server
-        websocket.send(JSON.stringify({action: "getInitialState"}))
+    function generateInitialState(_players){ //this needs to come from the server
         var playerList = []
         var freeSpots = range(0,8)
         _players.forEach((player) => {
@@ -110,21 +111,7 @@ export async function loader({ params }){
             
         //}
         //return worker
-        const sock = new WebSocket("ws://localhost:3001/gamesession")
-        sock.onopen = ()=>{
-            const payload = JSON.stringify({type: "Greetings!"})
-            sock.send(payload)
-        }
-        sock.onerror = (e)=>{
-            console.log(e.message)
-        }
-        sock.onclose = ()=>{
-        }
-        sock.onmessage = function(message){
-            const payload = message.data
-            this.dispatchState(payload ? JSON.parse(payload) : {action: "NoAct"})//this should be in the context of <Game>
-        }
-        return sock
+        
     } catch (error){
         throw redirect("/")
     }
