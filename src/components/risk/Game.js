@@ -23,7 +23,7 @@ function Game(props){
         const new_players = []
         const sock = new WebSocket("ws://localhost:3001/gamesession/1/1")// hardcoded gameid and userid, need to get dynamically
         sock.onopen = ()=>{
-            const payload = JSON.stringify({type: "getInitialState"})
+            const payload = JSON.stringify({type: "GET_INITIAL_STATE"})
             sock.send(payload)
         }
         sock.onerror = (e)=>{
