@@ -15,7 +15,7 @@ function Game(props){
 
     const [gameState, dispatchState] = useReducer(stateReducer, { playerList: [], freeSpotsList: [], deck: null, positionTurn: 0 })
 
-    const [players, setPlayers] = useState([])
+    //const [players, setPlayers] = useState([])
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
     /*
@@ -30,6 +30,7 @@ function Game(props){
             console.log(e.message)
         }
         sock.onclose = ()=>{
+            alert("closed")
         }
 
         sock.onmessage = function(message){
