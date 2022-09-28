@@ -13,16 +13,16 @@ import _ from "lodash"
 
 
 function Game(props){
-
-    const [gameState, dispatchState] = useReducer(stateReducer, { playerList: [], freeSpotsList: [], deck: null, positionTurn: 0 })
-
-    //const [players, setPlayers] = useState([])
+    const [gameState, dispatchState] = useReducer(stateReducer, { id: useLoaderData(), players: {playerList: [], turn_stack: []}, deck: {}})
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
+    
     /*
     useEffect(function(){
         const new_players = []
-        const sock = new WebSocket("ws://localhost:3001/gamesession/1/1")// hardcoded gameid and userid, need to get dynamically
+        const user_id = authctx.id
+        const game_id = loader.
+        const sock = new WebSocket(`ws://localhost:3001/gamesession/${gameState.id}/${user_id}`)// hardcoded gameid and userid, need to get dynamically
         sock.onopen = ()=>{
             const payload = JSON.stringify({type: "GET_INITIAL_STATE"})
             sock.send(payload)
@@ -36,7 +36,7 @@ function Game(props){
 
         sock.onmessage = function(message){
             const payload = message.data
-            this.dispatchState(payload ? JSON.parse(payload) : {type: "NoAct"})//this should be in the context of <Game>
+            this.dispatchState(payload ? JSON.parse(payload) : {type: "NoAct"})//"this" should be in the context of <Game>
         }.bind(this)
 
         return sock
@@ -46,7 +46,7 @@ function Game(props){
     function stateReducer(prevState, action){
         switch(action.type){
             case 'INITIALIZE_GAME':
-                return generateInitialState(action.data.playerList)
+                return generateInitialState(action.players)
             case 'PLAYER_CHANGE/ADD':
                 return addNewPlayer(prevState, action.player)
             case 'PLAYER_CHANGE/REMOVE':
@@ -107,7 +107,7 @@ function Game(props){
 
 export default Game
 
-export async function loader({ params }){
+export function loader({ params }){
     const gameId = params.id
     //create webworker which manages a
         // websocket() interface with websocket server

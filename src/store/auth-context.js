@@ -1,6 +1,7 @@
 import React, { useState} from 'react'
 
 const AuthContext = React.createContext({
+    id: 0,
     isLoggedIn: false,
     onLogout: ()=> {},
     onLogin: () => {},
@@ -11,15 +12,16 @@ const AuthContext = React.createContext({
 })
 
 export function AuthContextProvider(props){
+    const [id, setId] = useState(0)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [joinClicked, setJoinClicked] = useState(false)
     const [joinedPosition, setJoinedPosition] = useState(-1)
 
-    const logoutHandler = () => {
+    const logoutHandler = function(){
         setIsLoggedIn(false)
     }
 
-    const loginHandler = () => {
+    const loginHandler = function(){
         setIsLoggedIn(true)
     }
 
