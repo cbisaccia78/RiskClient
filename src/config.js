@@ -26,27 +26,17 @@ export const cardPartition = [
     [[0.26, 0.60, 29], [0.30, 0.64, 29]],
 ]
 
-export const Suit = Object.freeze({
+export const COUNTRIES = Object.freeze({
     HEARTS: 'hearts',
     SPADES: 'spades',
     CLUBS: 'clubs',
     DIAMONDS: 'diamonds'
 })
 
-export const Rank = Object.freeze({
-    TWO: {string: '2', val: 2},
-    THREE: {string: '3', val: 3},
-    FOUR: {string: '4', val: 4},
-    FIVE: {string: '5', val: 5},
-    SIX: {string: '6', val: 6},
-    SEVEN: {string: '7', val: 7},
-    EIGHT: {string: '8', val: 8}, 
-    NINE: {string: '9', val: 9},
-    TEN: {string: '10', val: 10},
-    JACK: {string: 'J', val: 11},
-    QUEEN: {string: 'Q', val: 12},
-    KING: {string: 'K', val: 13},
-    ACE: {string: 'A', val: 14}
+export const UNIT = Object.freeze({
+    SOLDIER : 1,
+    HORSE : 5,
+    CANNON : 10
 })
 
 export const tableGeometry = {

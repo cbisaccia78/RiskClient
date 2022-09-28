@@ -8,6 +8,7 @@ import { Fragment } from "react";
 import JoinForm from "../UI/JoinForm";
 import { randInt, range } from '../../helpers/helpers'
 import { Deck } from '../../helpers/Deck'
+import _ from "lodash"
 
 
 
@@ -46,12 +47,18 @@ function Game(props){
         switch(action.type){
             case 'INITIALIZE_GAME':
                 return generateInitialState(action.data.playerList)
-            case 'NEW_PLAYER':
-                return addNewPlayer(prevState, action.player, action.new_position)
+            case 'PLAYER_CHANGE/ADD':
+                return addNewPlayer(prevState, action.player)
+            case 'PLAYER_CHANGE/REMOVE':
+                return
+            case 'DECK/SHUFFLE':
+                return
+            case 'DECK/DEAL':
+                return
             case 'TURN_SWITCH':
                 return
             default:
-                throw new Error()
+                return prevState
         }
     }
 
@@ -70,14 +77,11 @@ function Game(props){
         return { playerList: playerList, freeSpotsList: freeSpots, deck: deck, positionTurn: 0 }
     }
 
-    function addNewPlayer(prevState, player, new_position){
-        let freeSpots = prevState.freeSpotsList
-        let playerList = prevState.playerList
-        const freeSpotPos = freeSpots.indexOf(new_position)
-        player.position = new_position
-        playerList.push(player)
-        freeSpots.splice(freeSpotPos, 1)
-        return { ...prevState, playerList: playerList, freeSpotsList: freeSpots}
+    function addNewPlayer(prevState, player){
+        let players = _.cloneDeep(prevState.players.playerList)
+        let turn_stack = _.cloneDeep(prevState.players.turn_stack)
+        players.splice(player.table_position, 0, player)
+        return { ...prevState, players: players}
     }
 
     function handleNewPlayer(player, position){
