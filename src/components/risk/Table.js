@@ -20,7 +20,7 @@ const determineCountry = (evt) => {
 }
 
 function Table(props){
-    const authctx = useContext(AuthContext)
+    //const authctx = useContext(AuthContext)
     let players = props.players
     let num_players = players.length
     const [boundingRect, setBoundingRect] = useState(calculateBB())
@@ -105,7 +105,7 @@ function Table(props){
     if(num_players < 6){
         for(var i = 0; i < num_players; i++){
             if(players[i] == null){
-                openSeatButtons.push(<OpenSeat key={`open-${i}`} onClick={props.joinHandler} onNewPlayer={props.newPlayerHandler} position={position} generatePosition={playerPosition}/>)
+                openSeatButtons.push(<OpenSeat key={`open-${i}`} onClick={props.joinHandler} onNewPlayer={props.newPlayerHandler} position={i} generatePosition={playerPosition}/>)
             }
         }
     }
@@ -119,7 +119,7 @@ function Table(props){
                     </Fragment>)
                 })
             }
-            {openSeatButtons}
+            {!props.joined ? openSeatButtons : <></>}
         </div>
     )
 }

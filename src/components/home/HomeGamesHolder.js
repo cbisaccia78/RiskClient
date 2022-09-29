@@ -1,15 +1,16 @@
 import './HomeGamesHolder.css'
 import React from "react";
 import GamesList from './GamesList';
-import getGames from '../../static/data/gameData'
+import { Button } from 'react-bootstrap';
+
 
 export default function(){
     
-    
     return (
     <div className="HomeGamesHolder">
-        <GamesList gamesList={getGames()}/>
+        <GamesList/>
         {/* create game button will go here */}
+        <Button />
     </div>
     )
 }

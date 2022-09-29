@@ -1,3 +1,4 @@
+/*
 import d2 from "./static/images/playingcards/Diamonds/2.png"
 import d3 from "./static/images/playingcards/Diamonds/3.png"
 import d4 from "./static/images/playingcards/Diamonds/4.png"
@@ -105,3 +106,4 @@ export const cardPics = {
     "sK": sK,
     "sA": sA
 }
+*/

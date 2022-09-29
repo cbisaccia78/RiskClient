@@ -1,4 +1,5 @@
 import React, { useState} from 'react'
+import { useEffect } from 'react'
 
 const AuthContext = React.createContext({
     id: 0,
@@ -11,6 +12,13 @@ export function AuthContextProvider(props){
     const [id, setId] = useState(0)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     
+    useEffect(function(){
+        const cached_login = localStorage.getItem("riskuser") 
+        if(cached_login){
+            setId(cached_login.id)
+            setIsLoggedIn(true)
+        }
+    }.bind(this), [])
 
     const logoutHandler = function(){
         setIsLoggedIn(false)

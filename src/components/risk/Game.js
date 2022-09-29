@@ -14,6 +14,7 @@ import _ from "lodash"
 function Game(props){
     const [gameState, dispatchState] = useReducer(stateReducer, { id: useLoaderData(), players: {playerList: [null,null,null,null,null,null,], turn_stack: []}, deck: {}})
     const [joinClicked, setJoinClicked] = useState(false)
+    const [joined, setJoined] = useState(false)
     const [joinedPosition, setJoinedPosition] = useState(-1)
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
@@ -89,10 +90,10 @@ function Game(props){
     return (
         <Fragment>
             <div className={classes.gameBackground} id="table-background">
-                <Table players={gameState.players.playerList} joinHandler={joinHandler}>
+                <Table players={gameState.players.playerList} joined={joined} joinClickHandler={joinHandler} joinedHandler={setJoined}>
                 </Table>
             </div>
-            {authctx.isLoggedIn && joinClicked ? <JoinForm onJoinSubmit={onJoinSubmit}/> : <></>}
+            {authctx.isLoggedIn && joinClicked ? <JoinForm onJoinSubmit={joinHandler}/> : <></>}
         </Fragment>
     )
 }
