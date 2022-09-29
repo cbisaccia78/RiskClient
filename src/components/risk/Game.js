@@ -7,7 +7,6 @@ import classes from './Table.module.css'
 import { Fragment } from "react";
 import JoinForm from "../UI/JoinForm";
 import { randInt, range } from '../../helpers/helpers'
-import { Deck } from '../../helpers/Deck'
 import _ from "lodash"
 
 
@@ -19,10 +18,7 @@ function Game(props){
     
     /*
     useEffect(function(){
-        const new_players = []
-        const user_id = authctx.id
-        const game_id = loader.
-        const sock = new WebSocket(`ws://localhost:3001/gamesession/${gameState.id}/${user_id}`)// hardcoded gameid and userid, need to get dynamically
+        const sock = new WebSocket(`ws://localhost:3001/gamesession/${gameState.id}/${authctx.id}`)// hardcoded gameid and userid, need to get dynamically
         sock.onopen = ()=>{
             const payload = JSON.stringify({type: "GET_INITIAL_STATE"})
             sock.send(payload)
@@ -46,7 +42,7 @@ function Game(props){
     function stateReducer(prevState, action){
         switch(action.type){
             case 'INITIALIZE_GAME':
-                return generateInitialState(action.players)
+                return action.state
             case 'PLAYER_CHANGE/ADD':
                 return addNewPlayer(prevState, action.player)
             case 'PLAYER_CHANGE/REMOVE':
@@ -60,21 +56,6 @@ function Game(props){
             default:
                 return prevState
         }
-    }
-
-    function generateInitialState(_players){ //this needs to come from the server
-        var playerList = []
-        var freeSpots = range(0,8)
-        _players.forEach((player) => {
-            const freeSpotPos = randInt(0, freeSpots.length)
-            const position = freeSpots[freeSpotPos]
-            player.position = position
-            playerList.push(player)
-            freeSpots.splice(freeSpotPos, 1)
-        })
-        const deck = new Deck()
-        deck.shuffle()
-        return { playerList: playerList, freeSpotsList: freeSpots, deck: deck, positionTurn: 0 }
     }
 
     function addNewPlayer(prevState, player){
@@ -97,7 +78,7 @@ function Game(props){
     return (
         <Fragment>
             <div className={classes.gameBackground} id="table-background">
-                <Table players={gameState.playerList} freeSpots={gameState.freeSpotsList}>
+                <Table players={gameState.players.playerList}>
                 </Table>
             </div>
             {authctx.joinClicked ? <JoinForm onNewPlayer={handleNewPlayer} onJoinSubmit={onJoinSubmit}/> : <></>}
