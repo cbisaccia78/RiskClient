@@ -6,6 +6,7 @@ import { isInsidePolygon } from "../../helpers/helpers"
 import OpenSeat from './OpenSeat'
 import Player from './Player'
 import Hand from './Hand'
+import AuthContext from '../../store/auth-context'
 
 const determineCountry = (evt) => {
   /*const { mouseX, mouseY } = evt.getXY // need to find actual method
@@ -19,6 +20,7 @@ const determineCountry = (evt) => {
 }
 
 function Table(props){
+    const authctx = useContext(AuthContext)
     let players = props.players
     let num_players = players.length
     const [boundingRect, setBoundingRect] = useState(calculateBB())
@@ -100,20 +102,21 @@ function Table(props){
     }
 
     var openSeatButtons = []
-    if(num_players < 8){
-        for(var i = 0; i < props.freeSpots.length; i++){
-            const position = props.freeSpots[i]
-            openSeatButtons.push(<OpenSeat key={`open-${position}`} onClick={props.onJoinClick} onNewPlayer={props.newPlayerHandler} position={position} generatePosition={playerPosition}/>)
+    if(num_players < 6){
+        for(var i = 0; i < num_players; i++){
+            if(players[i] == null){
+                openSeatButtons.push(<OpenSeat key={`open-${i}`} onClick={authctx.joinHandler} onNewPlayer={props.newPlayerHandler} position={position} generatePosition={playerPosition}/>)
+            }
         }
     }
     return (
         <div className={classes.gameTable} style={boundingRect} id="game-table" onClick = {determineCountry}>
-            {players.map((player) => {
-                    return (<Fragment>
+            {players.filter(val => val != null).map((player) => {
+                    return (
+                    <Fragment>
                         <Player key={`player-${player.position}`} data={player} generatePosition={playerPosition}/>
                         <Hand key={`hand-${player.position}`} hand={player.hand} playerPos={player.position} cardPosition={cardPosition}/>
                     </Fragment>)
-                    
                 })
             }
             {openSeatButtons}

@@ -26,17 +26,17 @@ export const cardPartition = [
     [[0.26, 0.60, 29], [0.30, 0.64, 29]],
 ]
 
-export const COUNTRIES = Object.freeze({
+export const TERRITORIES = Object.freeze({
     HEARTS: 'hearts',
     SPADES: 'spades',
     CLUBS: 'clubs',
     DIAMONDS: 'diamonds'
 })
 
-export const UNIT = Object.freeze({
-    SOLDIER : 1,
-    HORSE : 5,
-    CANNON : 10
+export const UNITS = Object.freeze({
+    INFANTRY : 1,
+    CAVALRY : 5,
+    ARTILLERY : 10
 })
 
 export const tableGeometry = {
