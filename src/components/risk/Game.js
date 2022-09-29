@@ -13,6 +13,8 @@ import _ from "lodash"
 
 function Game(props){
     const [gameState, dispatchState] = useReducer(stateReducer, { id: useLoaderData(), players: {playerList: [null,null,null,null,null,null,], turn_stack: []}, deck: {}})
+    const [joinClicked, setJoinClicked] = useState(false)
+    const [joinedPosition, setJoinedPosition] = useState(-1)
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
     
@@ -25,10 +27,12 @@ function Game(props){
                 sock.send(payload)
             }
             sock.onerror = (e)=>{
+                this.dispatchState({type: "SOCKET_ERROR"})
                 console.log(e.message)
             }
-            sock.onclose = ()=>{
-                alert("closed")
+            sock.onclose = (ev) =>{
+                this.dispatchState({type: "SOCKET_CLOSE"})
+                alert("closed with event: " + ev.reason)
             }
 
             sock.onmessage = function(message){
@@ -54,6 +58,10 @@ function Game(props){
                 return
             case 'TURN_SWITCH':
                 return
+            case 'SOCKET/ERROR':
+                return
+            case 'SOCKET/CLOSE':
+                return
             default:
                 return prevState
         }
@@ -70,8 +78,10 @@ function Game(props){
 
     }
 
-    function onJoinSubmit(){
-        authctx.setJoinClicked(false)
+
+    const joinHandler = function(position){
+        setJoinClicked(true)
+        setJoinedPosition(position)
     }
 
     //useEffect(()=>{}, [playerToAct])
@@ -79,10 +89,10 @@ function Game(props){
     return (
         <Fragment>
             <div className={classes.gameBackground} id="table-background">
-                <Table players={gameState.players.playerList}>
+                <Table players={gameState.players.playerList} joinHandler={joinHandler}>
                 </Table>
             </div>
-            {authctx.joinClicked ? <JoinForm onJoinSubmit={onJoinSubmit}/> : <></>}
+            {authctx.isLoggedIn && joinClicked ? <JoinForm onJoinSubmit={onJoinSubmit}/> : <></>}
         </Fragment>
     )
 }

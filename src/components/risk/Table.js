@@ -105,7 +105,7 @@ function Table(props){
     if(num_players < 6){
         for(var i = 0; i < num_players; i++){
             if(players[i] == null){
-                openSeatButtons.push(<OpenSeat key={`open-${i}`} onClick={authctx.joinHandler} onNewPlayer={props.newPlayerHandler} position={position} generatePosition={playerPosition}/>)
+                openSeatButtons.push(<OpenSeat key={`open-${i}`} onClick={props.joinHandler} onNewPlayer={props.newPlayerHandler} position={position} generatePosition={playerPosition}/>)
             }
         }
     }
