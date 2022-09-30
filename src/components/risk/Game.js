@@ -18,7 +18,6 @@ function Game(props){
     const [joinedPosition, setJoinedPosition] = useState(-1)
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
-    
 
     useEffect(function(){
         const establishConnection = async function(){
@@ -28,11 +27,12 @@ function Game(props){
                 sock.send(payload)
             }
             sock.onerror = (e)=>{
-                this.dispatchState({type: "SOCKET_ERROR"})
+                dispatchState({type: "SOCKET_ERROR"})
                 console.log(e.message)
             }
             sock.onclose = (ev) =>{
-                this.dispatchState({type: "SOCKET_CLOSE"})
+                debugger
+                dispatchState({type: "SOCKET_CLOSE"})
                 alert("closed with event: " + ev.reason)
             }
 
@@ -111,7 +111,7 @@ export function loader({ params }){
             
         //}
         //return worker
-        
+        return gameId
     } catch (error){
         throw redirect("/")
     }

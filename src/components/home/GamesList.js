@@ -3,51 +3,49 @@ import Table from "react-bootstrap/Table"
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useEffect } from "react";
+import { useContext } from "react";
+import AuthContext from "../../store/auth-context";
+import ThemeContext from "../../store/theme-context";
 
 export default function(props){
-    const [clicked, setClicked] = useState(false)
+    const authctx = useContext(AuthContext)
+    const themectx = useContext(ThemeContext)
     const [gameList, setGameList] = useState([])
 
     useEffect(function(){
         const getGames = async function(){
             try {
-                const response = await fetch("localhost:3001/games/all")
-                const gamelist = await response.json()
-                setGameList = gamelist.games
+                const response = await fetch("http://localhost:3001/games/active")
+                const parsed = await response.json()
+                console.log(parsed)
+                setGameList(parsed)
             } catch (error){
                 console.error(error)
             }
         }
+        getGames()
     }.bind(this), [])
-
-    const navigate = useNavigate()
-
-    const rowClickHandler = function(e){
-        navigate(`/game/${1}`)
-    }
-    
-
+    console.log(gameList)
     return (
     <Table hover striped>
         <thead>
             <tr>
                 <th>Name</th>
-                <th>Stakes</th>
                 <th>Population</th>
             </tr>
         </thead>
         <tbody>
-            {gameList.map(game => <GameRow name={game.name} stakes={game.stakes} numPlayers={game.numPlayers} clickHandler={rowClickHandler.bind(this)}/>)}
+            {gameList.map(game => <GameRow key={game.id} id={game.id} name={game.name} numPlayers={game.player_ids.length}/>)}
         </tbody>
     </Table>
     )
 }
 
 function GameRow(props){
+    const navigate = useNavigate()
     return (
-    <tr onClick={props.clickHandler}>
+    <tr onClick={()=>{navigate(`/game/${props.id}`)}}>
         <td>{props.name}</td>
-        <td>{props.stakes}</td>
         <td>{props.numPlayers}/6</td>
     </tr>
     )
