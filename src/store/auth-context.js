@@ -28,8 +28,10 @@ export function AuthContextProvider(props){
     }
 
     const loginHandler = function(){
+        var successful = false
         //validate with server
-        setIsLoggedIn(false)
+        setIsLoggedIn(successful)
+        setIsLoggingIn(false)
     }
 
     const loginClickHandler = function(){

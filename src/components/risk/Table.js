@@ -104,7 +104,7 @@ function Table(props){
     }
 
     var openSeatButtons = []
-    console.log(num_players);
+    //console.log(num_players);
 
     for(var i = 0; i < 6 - num_players; i++){
         if(players[i] == null){
