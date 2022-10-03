@@ -4,9 +4,10 @@ import React from 'react'
 
 function Player(props){
     let data = props.data
+    //console.log(data);
     return (
     createPortal(
-    <button className='player' style={props.generatePosition(data.position)}>
+    <button className='player' style={props.generatePosition(data.table_position)}>
         {data.image ? <img src={data.image} /> : data.name}
     </button>, document.getElementById('root'))
     )

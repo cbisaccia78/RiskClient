@@ -22,7 +22,8 @@ const determineCountry = (evt) => {
 function Table(props){
     //const authctx = useContext(AuthContext)
     let players = props.players
-    let num_players = players.length
+    //console.log(players);
+    let num_players = players.filter(player=>player!=null).length
     const [boundingRect, setBoundingRect] = useState(calculateBB())
 
     useEffect(() => {
@@ -102,24 +103,26 @@ function Table(props){
     }
 
     var openSeatButtons = []
-    if(num_players < 6){
-        for(var i = 0; i < num_players; i++){
-            if(players[i] == null){
-                openSeatButtons.push(<OpenSeat key={`open-${i}`} onClick={props.joinHandler} onNewPlayer={props.newPlayerHandler} position={i} generatePosition={playerPosition}/>)
-            }
+    console.log(num_players);
+
+    for(var i = 0; i < 6 - num_players; i++){
+        if(players[i] == null){
+            openSeatButtons.push(<OpenSeat key={`open-${i}`} onClick={props.joinHandler} onNewPlayer={props.newPlayerHandler} position={i} generatePosition={playerPosition}/>)
         }
     }
+
     return (
         <div className={classes.gameTable} style={boundingRect} id="game-table" onClick = {determineCountry}>
             {players.filter(val => val != null).map((player) => {
                     return (
                     <Fragment>
                         <Player key={`player-${player.position}`} data={player} generatePosition={playerPosition}/>
-                        <Hand key={`hand-${player.position}`} hand={player.hand} playerPos={player.position} cardPosition={cardPosition}/>
+                        {/*<Hand key={`hand-${player.position}`} hand={player.hand} playerPos={player.position} cardPosition={cardPosition}/>*/}
                     </Fragment>)
                 })
             }
-            {!props.joined ? openSeatButtons : <></>}
+            {/*!props.joined ? openSeatButtons : <></>*/}
+            {openSeatButtons}
         </div>
     )
 }

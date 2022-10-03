@@ -31,7 +31,6 @@ function Game(props){
                 console.log(e.message)
             }
             sock.onclose = (ev) =>{
-                debugger
                 dispatchState({type: "SOCKET_CLOSE"})
                 alert("closed with event: " + ev.reason)
             }
@@ -48,6 +47,7 @@ function Game(props){
     function stateReducer(prevState, action){
         switch(action.type){
             case 'INITIALIZE_GAME':
+                //console.log(action.state)
                 return {...prevState, ...(action.state)}
             case 'PLAYER_CHANGE/ADD':
                 return addPlayer(prevState, action.player)
