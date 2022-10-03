@@ -10,8 +10,6 @@ import { createPortal } from "react-dom"
 function JoinForm(props){
     const [joinSubmit, setJoinSubmit] = useState(false)
     const usernameInputRef = useRef('')
-    const pictureInputRef = useRef()
-
     const authctx = useContext(AuthContext)
 
     function joinSubmitHandler(event){

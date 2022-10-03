@@ -56,9 +56,15 @@ export default function(){
                         Logout
                     </Button>
                     </> : 
-                    <Button variant="outline-primary" onClick={authctx.onLogin}>
+                    <>
+                    <Button variant="outline-primary" onClick={authctx.onLoginClick}>
                         Login
-                    </Button>}
+                    </Button>
+                    <Button variant="outline-primary" onClick={authctx.onRegisterClick}>
+                        Register
+                    </Button>
+                    </>
+                    }
                     
                 </Navbar.Collapse>
             </Container>
