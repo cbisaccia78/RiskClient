@@ -42,6 +42,7 @@ function Table(props){
         let img = document.createElement("img")
         img.src = riskboard
         img.className = "gameSVG"
+        img.style = "height: 100%; width: 100%;"
         const t = document.getElementById("game-table")
         t.appendChild(img)
       }, [])
@@ -71,7 +72,7 @@ function Table(props){
         */
         let real_height = boundingRect.height / 0.7
         let real_width = boundingRect.width / 0.7
-
+        let square = real_height < real_width ? real_height : real_width
         let scale = playerPartition[position]
         let scale_x = scale[0]
         let scale_y = scale[1]
@@ -81,7 +82,7 @@ function Table(props){
         let new_left = real_width*scale_x
         
         
-        return {top: new_top, left: new_left}
+        return {top: new_top, left: new_left, width: 0.1*square, height: 0.1*square}
     }
 
     function cardPosition(playerPos, cardNum){

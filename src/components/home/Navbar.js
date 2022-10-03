@@ -7,9 +7,11 @@ import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
 import { LinkContainer } from "react-router-bootstrap"
 import ThemeContext from "../../store/theme-context";
+import AuthContext from "../../store/auth-context";
 
 export default function(){
     const themectx = useContext(ThemeContext)
+    const authctx = useContext(AuthContext)
     return (
         /*
         <nav style={{top: "100px", borderBottom: "solid 1px"}}>
@@ -43,8 +45,21 @@ export default function(){
                         className="me-2"
                         aria-label="Search"
                         />
-                        <Button variant="outline-success">Search</Button>
+                        <Button variant="outline-primary">Search</Button>
                     </Form>
+                    {authctx.isLoggedIn ? 
+                    <>
+                    <Button variant="outline-primary" onClick={authctx.onProfileClick}>
+                        Profile
+                    </Button>
+                    <Button variant="outline-danger" onClick={authctx.onLogout}>
+                        Logout
+                    </Button>
+                    </> : 
+                    <Button variant="outline-primary" onClick={authctx.onLogin}>
+                        Login
+                    </Button>}
+                    
                 </Navbar.Collapse>
             </Container>
        </Navbar>
