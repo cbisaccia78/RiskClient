@@ -30,9 +30,24 @@ export function AuthContextProvider(props){
         setIsLoggedIn(false)
     }
 
-    const loginHandler = function(userName, password){
+    const loginHandler = async function(userName, password){
         var successful = false
         //validate with server
+        try{
+            const res = await fetch("http://localhost:3001/login", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: userName, 
+                    password: password
+                })
+            })//should be https eventually
+            const result = res.json();
+        } catch (error){
+            console.error(error)
+        }
         setIsLoggedIn(successful)
         setLoginError(successful)
         setIsLoggingIn(false)
@@ -42,9 +57,28 @@ export function AuthContextProvider(props){
         setIsLoggingIn(true)
     }
 
-    const registerHandler = function(fullName, userName, password, email, bString){
+    const registerHandler = async function(fullName, userName, password, email, hexString){
         //validate with server
         var successful = false
+        console.log(hexString)
+        try{
+            const res = await fetch("http://localhost:3001/register", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: fullName,
+                    username: userName, 
+                    password: password,
+                    email: email,
+                    imageB: hexString
+                })
+            })//should be https eventually
+            const result = res.json()
+        } catch (error){
+            console.error(error)
+        }
         setIsRegistering(successful)
         setRegisterError(successful)
     }

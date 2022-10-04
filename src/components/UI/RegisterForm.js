@@ -3,6 +3,7 @@ import Modal from 'react-bootstrap/modal'
 import Button from 'react-bootstrap/button'
 import Form from 'react-bootstrap/Form'
 import Alert from 'react-bootstrap/Alert'
+import { int8ArrToHexString } from "../../helpers/helpers";
 import { useContext } from "react";
 import AuthContext from "../../store/auth-context";
 
@@ -21,15 +22,23 @@ export default function(props){
         const userName = document.getElementById('registerUserName').value
         const password = document.getElementById('registerPassword').value
         const email = document.getElementById('registerEmail').value
-        var bString = ""
+        debugger
         let f = document.getElementById('registerImage').files[0]
-        if(!f){
+        if(f){
             let fr = new FileReader()
-            fr.readAsBinaryString(f)
-            bString = fr.result
+            fr.onload = () => {
+                debugger
+                const int8arr = new Int8Array(fr.result)
+                const hexString = int8ArrToHexString(int8arr)
+                authctx.onRegister(fullName, userName, password, email, hexString)
+            }
+            fr.onerror = ()=>{
+                authctx.onRegister(fullName, userName, password, email, '\\x')
+            }
+            fr.readAsArrayBuffer(f)
         }
         
-        authctx.onRegister(fullName, userName, password, email, bString)
+        
     }
     return (
         <Modal show={authctx.isRegistering} onHide={handleClose}>
@@ -69,7 +78,7 @@ export default function(props){
                         Could not register
                     </Alert> : <></>}
                     
-                    <Button onClick={authctx.onRegister}>Submit</Button>
+                    <Button onClick={handleClose}>Submit</Button>
                 </Modal.Footer>
             </Modal.Dialog>
         </Modal>

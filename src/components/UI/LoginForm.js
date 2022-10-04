@@ -40,7 +40,7 @@ export default function(props){
                     <Alert variant="danger">
                         Could not register
                     </Alert> : <></>}
-                    <Button onClick={authctx.onLogin}>Submit</Button>
+                    <Button onClick={handleClose}>Submit</Button>
                 </Modal.Footer>
             </Modal.Dialog>
         </Modal>

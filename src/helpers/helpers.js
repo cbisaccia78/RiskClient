@@ -45,3 +45,20 @@ export const isInsidePolygon = function(polygon, mouseX, mouseY) {
     }
     return c;
 }
+
+export const int8ArrToHexString = function(int8arr){
+    const mostSig = 240
+    const leastSig = 15
+    var hexString = '\\x'
+    int8arr.forEach(b=>{
+        let ms = (mostSig & b) >> 4
+        hexString += ms.toString(16)
+        let ls = (leastSig & b)
+        hexString += ls.toString(16)
+    })
+    return hexString
+}
+
+export const hexStringToInt8Arr = function(hexString){
+    const int8arr = new Int8Array()
+}
