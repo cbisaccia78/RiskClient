@@ -12,7 +12,10 @@ export function AuthContextProvider(props){
     const [id, setId] = useState(0)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [isLoggingIn, setIsLoggingIn] = useState(false)
+    const [loginError, setLoginError] = useState(false)
     const [isRegistering, setIsRegistering] = useState(false)
+    const [registerError, setRegisterError] = useState(false)
+
     
     useEffect(function(){
         const cached_login = localStorage.getItem("riskuser") 
@@ -27,10 +30,11 @@ export function AuthContextProvider(props){
         setIsLoggedIn(false)
     }
 
-    const loginHandler = function(){
+    const loginHandler = function(userName, password){
         var successful = false
         //validate with server
         setIsLoggedIn(successful)
+        setLoginError(successful)
         setIsLoggingIn(false)
     }
 
@@ -38,9 +42,11 @@ export function AuthContextProvider(props){
         setIsLoggingIn(true)
     }
 
-    const registerHandler = function(){
+    const registerHandler = function(fullName, userName, password, email, bString){
         //validate with server
-        setIsRegistering(false)
+        var successful = false
+        setIsRegistering(successful)
+        setRegisterError(successful)
     }
 
     const registerClickHandler = function(){
@@ -48,8 +54,9 @@ export function AuthContextProvider(props){
     }
     
     return <AuthContext.Provider value={{
+        id: id,
         isLoggedIn: isLoggedIn, isRegistering: isRegistering,
-        isLoggingIn: isLoggingIn,  id: id,
+        isLoggingIn: isLoggingIn,  registerError: registerError, loginError: loginError,
         onLogin: loginHandler, onLoginClick : loginClickHandler, 
         onLogoutClick: logoutClickHandler, 
         onRegister: registerHandler, onRegisterClick: registerClickHandler,

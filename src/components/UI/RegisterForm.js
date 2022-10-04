@@ -1,21 +1,35 @@
-import React, {useState, useRef} from "react";
+import React from "react";
 import Modal from 'react-bootstrap/modal'
 import Button from 'react-bootstrap/button'
+import Form from 'react-bootstrap/Form'
+import Alert from 'react-bootstrap/Alert'
 import { useContext } from "react";
 import AuthContext from "../../store/auth-context";
 
 export default function(props){
     const authctx = useContext(AuthContext)
 
-    const [submitClicked, setSubmitClicked] = useState(false)
+    /*
     const name = useRef('')
     const username = useRef('')
     const password = useRef('')
     const email = useRef('')
     const pictureInputRef = useRef()
-
+    */
     const handleClose = function(){
-        authctx.onRegister()
+        const fullName = document.getElementById('registerName').value
+        const userName = document.getElementById('registerUserName').value
+        const password = document.getElementById('registerPassword').value
+        const email = document.getElementById('registerEmail').value
+        var bString = ""
+        let f = document.getElementById('registerImage').files[0]
+        if(!f){
+            let fr = new FileReader()
+            fr.readAsBinaryString(f)
+            bString = fr.result
+        }
+        
+        authctx.onRegister(fullName, userName, password, email, bString)
     }
     return (
         <Modal show={authctx.isRegistering} onHide={handleClose}>
@@ -25,24 +39,36 @@ export default function(props){
                 </Modal.Header>
 
                 <Modal.Body>
-                <label htmlFor="registerName">Full Name</label>
-                <input type="text" id="registerName" ref={name} />
-
-                <label htmlFor="registerUsername">Username</label>
-                <input type="text" id="registerUsername" ref={username} />
-
-                <label htmlFor="registerPassword">Password</label>
-                <input type="password" id="registerPassword" ref={password} />
-
-                <label htmlFor="registerEmail">Email</label>
-                <input type="text" id="registerEmail" ref={email} />
-
-                <label htmlFor="registerImage">Profile Picture</label>
-                <input type="file" id="registerImage" accept="image/png, image/jpeg" />
-
+                    <Form>
+                        <Form.Group className="mb-3" controlId="registerName">
+                            <Form.Label>Full Name</Form.Label>
+                            <Form.Control type="text" placeholder="Enter name"/>
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="registerUserName">
+                            <Form.Label>Username</Form.Label>
+                            <Form.Control type="text" placeholder="Enter username"/>
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="registerPassword">
+                            <Form.Label>Password</Form.Label>
+                            <Form.Control type="password" placeholder="Enter password"/>
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="registerEmail">
+                            <Form.Label>Email address</Form.Label>
+                            <Form.Control type="email" placeholder="Enter email"/>
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="registerImage">
+                            <Form.Label>Profile Picture</Form.Label>
+                            <Form.Control type="file" accept="image/png, image/jpeg"/>
+                        </Form.Group>
+                    </Form>
                 </Modal.Body>
 
                 <Modal.Footer>
+                    {authctx.registerError ? 
+                    <Alert variant="danger">
+                        Could not register
+                    </Alert> : <></>}
+                    
                     <Button onClick={authctx.onRegister}>Submit</Button>
                 </Modal.Footer>
             </Modal.Dialog>

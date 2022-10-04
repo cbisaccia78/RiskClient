@@ -1,18 +1,18 @@
-import React, {useState, useRef} from "react";
+import React from "react";
 import Modal from 'react-bootstrap/modal'
 import Button from 'react-bootstrap/button'
+import Form from 'react-bootstrap/Form'
+import Alert from 'react-bootstrap/Alert'
 import { useContext } from "react";
 import AuthContext from "../../store/auth-context";
 
 export default function(props){
     const authctx = useContext(AuthContext)
 
-    const [submitClicked, setSubmitClicked] = useState(false)
-    const username = useRef('')
-    const password = useRef('')
-
     const handleClose = function(){
-        authctx.onLogin()
+        const username = document.getElementById('loginUserName').value
+        const password = document.getElementById('loginPassword').value
+        authctx.onLogin(username, password)
     }
 
     return (
@@ -23,15 +23,23 @@ export default function(props){
                 </Modal.Header>
 
                 <Modal.Body>
-                <label htmlFor="loginUsername">Username</label>
-                <input type="text" id="loginUsername" ref={username}>
-                </input>
-                <label htmlFor="loginPassword">Password</label>
-                <input type="password" id="loginPassword" ref={password}>
-                </input>
+                <Form>
+                    <Form.Group className="mb-3" controlId="loginUserName">
+                        <Form.Label>Username</Form.Label>
+                        <Form.Control type="text" placeholder="Enter username"/>
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="loginPassword">
+                        <Form.Label>Password</Form.Label>
+                        <Form.Control type="password" placeholder="Enter password"/>
+                    </Form.Group>
+                    </Form>
                 </Modal.Body>
 
                 <Modal.Footer>
+                    {authctx.loginError ? 
+                    <Alert variant="danger">
+                        Could not register
+                    </Alert> : <></>}
                     <Button onClick={authctx.onLogin}>Submit</Button>
                 </Modal.Footer>
             </Modal.Dialog>
