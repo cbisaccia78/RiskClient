@@ -41,7 +41,7 @@ export default function(props){
         
     }
     return (
-        <Modal show={authctx.isRegistering} onHide={handleClose}>
+        <Modal show={authctx.isRegistering} onHide={()=>{authctx.setIsRegistering(false)}}>
             <Modal.Dialog>
                 <Modal.Header closeButton>
                     <Modal.Title>Register</Modal.Title>

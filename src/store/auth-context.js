@@ -33,6 +33,7 @@ export function AuthContextProvider(props){
     const loginHandler = async function(userName, password){
         var successful = false
         //validate with server
+        var user_id = 0
         try{
             const res = await fetch("http://localhost:3001/login", {
                 method: 'POST',
@@ -44,13 +45,19 @@ export function AuthContextProvider(props){
                     password: password
                 })
             })//should be https eventually
-            const result = res.json();
+            const result = await res.json();
+            //console.log(result)
+            successful = result.success
+            user_id = successful ? result.user_id : 0
+            
         } catch (error){
             console.error(error)
         }
         setIsLoggedIn(successful)
-        setLoginError(successful)
-        setIsLoggingIn(false)
+        setLoginError(!successful)
+        setIsLoggingIn(!successful)
+        console.log(successful);
+        
     }
 
     const loginClickHandler = function(){
@@ -76,10 +83,11 @@ export function AuthContextProvider(props){
                 })
             })//should be https eventually
             const result = res.json()
+            successful = result.success
         } catch (error){
             console.error(error)
         }
-        setIsRegistering(successful)
+        setIsRegistering(!successful)
         setRegisterError(successful)
     }
 
@@ -91,6 +99,7 @@ export function AuthContextProvider(props){
         id: id,
         isLoggedIn: isLoggedIn, isRegistering: isRegistering,
         isLoggingIn: isLoggingIn,  registerError: registerError, loginError: loginError,
+        setIsRegistering: setIsRegistering, setIsLoggingIn: setIsLoggingIn,
         onLogin: loginHandler, onLoginClick : loginClickHandler, 
         onLogoutClick: logoutClickHandler, 
         onRegister: registerHandler, onRegisterClick: registerClickHandler,

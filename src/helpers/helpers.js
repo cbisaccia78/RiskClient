@@ -60,5 +60,28 @@ export const int8ArrToHexString = function(int8arr){
 }
 
 export const hexStringToInt8Arr = function(hexString){
-    const int8arr = new Int8Array()
+    /*
+         hexString: '\xhex1hex2...hexn'
+         val = hexString.split('\\x')[1] //error check this
+         val.forEach
+    */
+   const int8arrBuffer = []
+    try {
+        const val = hexString.split('\\x')[1]
+        var mostSig = true
+        var n = 0
+        for(var i = 0; i < val.length; i++){
+            var half = Number.parseInt(val[i])
+            if(mostSig){
+                n = half << 4
+            }else{
+                n += half       
+                int8arrBuffer.push(n)
+                n = 0
+            }
+            mostSig = !mostSig
+        }
+        
+    } catch (error){}
+    return Int8Array.from(int8arrBuffer)
 }

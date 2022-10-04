@@ -16,7 +16,7 @@ export default function(props){
     }
 
     return (
-        <Modal show={authctx.isLoggingIn} onHide={handleClose}>
+        <Modal show={authctx.isLoggingIn} onHide={()=>{authctx.setIsLoggingIn(false)}}>
             <Modal.Dialog>
                 <Modal.Header closeButton>
                     <Modal.Title>Register</Modal.Title>
