@@ -5,8 +5,7 @@ import Form from 'react-bootstrap/Form'
 import Alert from 'react-bootstrap/Alert'
 import { useContext, useRef, useState} from "react";
 import AuthContext from "../../store/auth-context";
-import { Link } from "react-router-dom";
-import { redirect } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useEffect } from "react";
 
 export default function(props){
@@ -21,13 +20,7 @@ export default function(props){
         props.onClose()
     }
 
-    useEffect(()=>{
-        if(clicked){
-            console.log('redirect');
-            throw redirect(`/game/0`)
-        }})
-
-    return (
+    return ( clicked ? <Navigate replace to="/game/create"/> :
         <Modal show={props.show} onHide={()=>{props.onClose()}}>
             <Modal.Dialog>
                 <Modal.Header closeButton>

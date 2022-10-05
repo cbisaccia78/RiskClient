@@ -1,42 +1,55 @@
-import classes from './JoinForm.module.css'
-import modalClasses from './Modal.module.css'
 import Button from './Button'
-import Card from './Card'
 import AuthContext from '../../store/auth-context'
-import { Fragment, useContext } from 'react';
-import React, { useState, useRef } from "react";
-import { createPortal } from "react-dom"
+import { useContext } from 'react';
+import React, { useState} from "react";
+import Modal from 'react-bootstrap/Modal'
+import Form from 'react-bootstrap/Form'
+import Alert from 'react-bootstrap/Alert'
+
 
 function JoinForm(props){
-    const [joinSubmit, setJoinSubmit] = useState(false)
-    const usernameInputRef = useRef('')
+    const [success, setSuccess] = useState(false)
+    const [failed, setFailed] = useState(false)
+    const selectedColor = useState("")
     const authctx = useContext(AuthContext)
 
-    function joinSubmitHandler(event){
-        event.preventDefault()
-        props.onJoinSubmit()
-        props.onNewPlayer({name: usernameInputRef.current.value, chips: 10000}, authctx.joinedPosition)
-        setJoinSubmit(true)
+    async function joinSubmitHandler(event){
+        try{
+            const result = await props.joinHandler()
+            
+            success = result.success
+        } finally{
+            props.setFailed(!success)
+            props.setSuccess(success)
+        }   
     }
 
     return (
-    createPortal(
-    <Fragment>
-        <div className={modalClasses.backdrop}></div>    
-        <Card className={classes.input}>
-            <form>
-                <h3>
-                    props.title
-                </h3>
-                <label>
-                    Username
-                </label>
-                <input type="text" ref={usernameInputRef}>
-                </input>
-                <Button type="submit" onClick={props.joinSubmitHandler}>Join</Button>
-            </form>
-        </Card>       
-    </Fragment>, document.getElementById('root'))
+        <Modal show={props.show} onHide={props.closeHandler}>
+            <Modal.Dialog>
+                <Modal.Header closeButton>
+                    <Modal.Title>Join</Modal.Title>
+                </Modal.Header>
+
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="gameName">
+                            <Form.Label>Select Color</Form.Label>
+                            <Form.Control type="radio" placeholder="Enter username"/>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+
+                <Modal.Footer>
+                    {failed ? 
+                    <Alert variant="danger">
+                        Could not join game
+                    </Alert> : <></>}
+                    {/*<Link to="/game/0">Submit</Link>*/}
+                    <Button onClick={joinSubmitHandler}>Submit</Button>
+                </Modal.Footer>
+            </Modal.Dialog>
+        </Modal>
     )
 }
 

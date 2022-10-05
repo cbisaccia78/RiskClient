@@ -3,17 +3,25 @@ import React from "react";
 import GamesList from './GamesList';
 import { Button } from 'react-bootstrap';
 import GameForm from '../UI/GameForm';
-import { useState } from 'react';
+import { useState, useContext} from 'react';
+import {Navigate} from 'react-router-dom'
+import AuthContext from '../../store/auth-context';
+import Alert from 'react-bootstrap/Alert'
 
 
 export default function(){
     const [createClicked, setCreateClicked] = useState(false)
-    return (
+    const authctx = useContext(AuthContext)
+    return ( createClicked && authctx.isLoggedIn ? <Navigate replace to="/game/create"/> :
     <div className="HomeGamesHolder">
         <GamesList/>
         {/* create game button will go here */}
         <Button variant="primary" onClick={()=>{setCreateClicked(true)}}>Create Game</Button>
-        <GameForm show={createClicked} onClose={()=>{setCreateClicked(false)}}/>
+        {createClicked && !(authctx.isLoggedIn) ? 
+            <Alert variant="danger">
+                Must be logged in to create game
+            </Alert> : <></>}
+        {/*<GameForm show={createClicked} onClose={()=>{setCreateClicked(false)}}/>*/}
     </div>
     )
 }

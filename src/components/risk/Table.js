@@ -108,7 +108,7 @@ function Table(props){
 
     for(var i = 0; i < 6 - num_players; i++){
         if(players[i] == null){
-            openSeatButtons.push(<OpenSeat key={`open-${i}`} onClick={props.joinHandler} onNewPlayer={props.newPlayerHandler} position={i} generatePosition={playerPosition}/>)
+            openSeatButtons.push(<OpenSeat key={`open-${i}`} joinClickHandler={props.joinClickHandler} position={i} generatePosition={playerPosition}/>)
         }
     }
 

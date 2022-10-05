@@ -21,7 +21,7 @@ function Game(props){
 
     useEffect(function(){
         const establishConnection = async function(){
-            const sock = new WebSocket(`ws://localhost:3001/gamesession/${gameState.id}/${authctx.id}`)// hardcoded gameid and userid, need to get dynamically
+            const sock = new WebSocket(`ws://localhost:3001/gamesession/${gameState.id}/${authctx.id}`, props.ws_proto || [])// hardcoded gameid and userid, need to get dynamically
             sock.onopen = ()=>{
                 const payload = JSON.stringify({type: "GET_INITIAL_STATE"})
                 sock.send(payload)
@@ -80,20 +80,38 @@ function Game(props){
     }
 
 
-    const joinHandler = function(position){
-        setJoinClicked(true)
+    const joinHandler = async function(position){
         setJoinedPosition(position)
+        const result = {success: false}
+        try{
+            const res = await fetch("http://localhost:3001/")//needs to be 
+            result = await res.json()
+        } finally{
+            setJoined(result.success)
+            return result
+        }
+
     }
+
+    const joinClickHandler = function(){
+        console.log('clicked');
+        setJoinClicked(true)
+    }
+
+    const formCloseHandler = function(){
+        setJoinClicked(false)
+    }
+
 
     //useEffect(()=>{}, [playerToAct])
 
     return (
         <Fragment>
             <div className={classes.gameBackground} id="table-background">
-                <Table players={gameState.players.playerList} joined={joined} joinClickHandler={joinHandler} joinedHandler={setJoined}>
+                <Table players={gameState.players.playerList} joined={joined} joinClickHandler={joinClickHandler}>
                 </Table>
             </div>
-            {authctx.isLoggedIn && joinClicked ? <JoinForm onJoinSubmit={joinHandler}/> : <></>}
+            <JoinForm joinHandler={joinHandler} closeHandler={formCloseHandler} show={authctx.isLoggedIn && joinClicked}/>
         </Fragment>
     )
 }
