@@ -23,7 +23,7 @@ const router = createBrowserRouter(
         <Route path="/" loader={()=>{}} element={<HomeGamesHolder />}/>
         <Route path="players" loader={()=>{}} element={<HomePlayerList />}/>
         <Route path="forum" loader={()=>{}} element={<HomeForum/>}/>
-        <Route path="game/create" element={<Game ws_proto={["CREATE"]}/> }/>
+        <Route path="game/create" element={<Game local={true}/> }/>
         <Route path="game/:id" loader={gameLoader} element={<Game /> }/>
       </Route>
   )

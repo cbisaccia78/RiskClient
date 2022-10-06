@@ -12,7 +12,7 @@ import _ from "lodash"
 
 
 function Game(props){
-    //const [local, setLocal] = useState(props.ws_proto == "CREATE") //use eventually to allow spectators
+    const [local, setLocal] = useState(props.local || false) //use eventually to allow spectators
     
     const [joinClicked, setJoinClicked] = useState(false)
     const [joined, setJoined] = useState(false)
@@ -25,8 +25,12 @@ function Game(props){
 
     useEffect(function(){
         const establishConnection = async function(){
-            if(joined){
-                const _sock = new WebSocket(`ws://localhost:3001/gamesession/${gameState.id}/${authctx.id}`, props.ws_proto || [])// hardcoded gameid and userid, need to get dynamically
+            if(joined || !local){
+                var ws_protos = [];
+                if(joined){
+                    ws_protos = local ? ["CREATE"] : ["JOIN"]
+                }
+                const _sock = new WebSocket(`ws://localhost:3001/gamesession/${gameState.id}/${authctx.id}`, ws_protos)// hardcoded gameid and userid, need to get dynamically
                 _sock.onopen = ()=>{
                     const payload = JSON.stringify({type: "GET_INITIAL_STATE"})
                     _sock.send(payload)
