@@ -1,5 +1,5 @@
 import React, { useContext, useReducer, useState, useEffect } from "react";
-import { redirect, useLoaderData} from "react-router-dom";
+import { redirect, useLoaderData, useLocation} from "react-router-dom";
 import AuthContext from "../../store/auth-context";
 import ThemeContext from "../../store/theme-context";
 import Table from './Table'
@@ -12,36 +12,51 @@ import _ from "lodash"
 
 
 function Game(props){
-    const [gameState, dispatchState] = useReducer(stateReducer, { id: useLoaderData(), players: {playerList: [null,null,null,null,null,null,], turn_stack: []}, deck: {}})
+    //const [local, setLocal] = useState(props.ws_proto == "CREATE") //use eventually to allow spectators
+    
     const [joinClicked, setJoinClicked] = useState(false)
     const [joined, setJoined] = useState(false)
+    const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), players: {playerList: [null,null,null,null,null,null,], turn_stack: []}, deck: {}})
     const [joinedPosition, setJoinedPosition] = useState(-1)
+    const [sock, setSock] = useState(null)
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
+    const location = useLocation();
 
     useEffect(function(){
         const establishConnection = async function(){
-            const sock = new WebSocket(`ws://localhost:3001/gamesession/${gameState.id}/${authctx.id}`, props.ws_proto || [])// hardcoded gameid and userid, need to get dynamically
-            sock.onopen = ()=>{
-                const payload = JSON.stringify({type: "GET_INITIAL_STATE"})
-                sock.send(payload)
-            }
-            sock.onerror = (e)=>{
-                dispatchState({type: "SOCKET_ERROR"})
-                console.log(e.message)
-            }
-            sock.onclose = (ev) =>{
-                dispatchState({type: "SOCKET_CLOSE"})
-                alert("closed with event: " + ev.reason)
-            }
+            if(joined){
+                const _sock = new WebSocket(`ws://localhost:3001/gamesession/${gameState.id}/${authctx.id}`, props.ws_proto || [])// hardcoded gameid and userid, need to get dynamically
+                _sock.onopen = ()=>{
+                    const payload = JSON.stringify({type: "GET_INITIAL_STATE"})
+                    _sock.send(payload)
+                }
+                _sock.onerror = (e)=>{
+                    dispatchState({type: "SOCKET_ERROR"})
+                    console.log(e.message)
+                }
+                _sock.onclose = (ev) =>{
+                    dispatchState({type: "SOCKET_CLOSE"})
+                    _sock.send(JSON.stringify({user_id: authctx.user_id}))
+                    alert("closed with event: " + ev.reason)
+                }
 
-            sock.onmessage = function(message){
-                const payload = message.data
-                dispatchState(payload ? JSON.parse(payload) : {type: "NoAct"})
-            }.bind(this)
+                _sock.onmessage = function(message){
+                    const payload = message.data
+                    dispatchState(payload ? JSON.parse(payload) : {type: "NoAct"})
+                }.bind(this)
+
+                setSock(_sock)
+            }
         }
         establishConnection()
-    }.bind(this), [])
+    }.bind(this), [joined])
+
+    useEffect(function(){
+        console.log(location)
+        //if(location.pathname != ['/game/create')sock.close("USER/LEFTPAGE")//is this async? 
+        //setSock(null) //if so need to make sure this doesnt cause race condition
+    }, [location])
 
     
     function stateReducer(prevState, action){
@@ -80,17 +95,10 @@ function Game(props){
     }
 
 
-    const joinHandler = async function(position){
+    const joinHandler = function(position){
         setJoinedPosition(position)
-        const result = {success: false}
-        try{
-            const res = await fetch("http://localhost:3001/")//needs to be 
-            result = await res.json()
-        } finally{
-            setJoined(result.success)
-            return result
-        }
-
+        setJoinClicked(false)
+        setJoined(true)
     }
 
     const joinClickHandler = function(){

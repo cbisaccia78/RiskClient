@@ -35,7 +35,7 @@ export default function(props){
             </tr>
         </thead>
         <tbody>
-            {gameList.map(game => <GameRow key={game.id} id={game.id} name={game.name} numPlayers={game.player_ids.length}/>)}
+            {gameList.map(game => <GameRow key={game.game_id} id={game.game_id} name={game.name || `game-${game.game_id}`} numPlayers={game.num_players}/>)}
         </tbody>
     </Table>
     )

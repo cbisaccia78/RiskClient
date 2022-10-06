@@ -8,21 +8,8 @@ import Alert from 'react-bootstrap/Alert'
 
 
 function JoinForm(props){
-    const [success, setSuccess] = useState(false)
-    const [failed, setFailed] = useState(false)
     const selectedColor = useState("")
     const authctx = useContext(AuthContext)
-
-    async function joinSubmitHandler(event){
-        try{
-            const result = await props.joinHandler()
-            
-            success = result.success
-        } finally{
-            props.setFailed(!success)
-            props.setSuccess(success)
-        }   
-    }
 
     return (
         <Modal show={props.show} onHide={props.closeHandler}>
@@ -41,12 +28,12 @@ function JoinForm(props){
                 </Modal.Body>
 
                 <Modal.Footer>
-                    {failed ? 
+                    {false ? 
                     <Alert variant="danger">
                         Could not join game
                     </Alert> : <></>}
                     {/*<Link to="/game/0">Submit</Link>*/}
-                    <Button onClick={joinSubmitHandler}>Submit</Button>
+                    <Button onClick={props.joinHandler}>Submit</Button>
                 </Modal.Footer>
             </Modal.Dialog>
         </Modal>
