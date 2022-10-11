@@ -46,3 +46,5 @@ export const tableGeometry = {
     top: 0.15,
     borderWidth: 30
 }
+
+export const DEVELOPMENT = true

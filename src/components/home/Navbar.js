@@ -8,6 +8,7 @@ import Form from 'react-bootstrap/Form'
 import { LinkContainer } from "react-router-bootstrap"
 import ThemeContext from "../../store/theme-context";
 import AuthContext from "../../store/auth-context";
+import { DEVELOPMENT } from "../../config";
 
 export default function(){
     const themectx = useContext(ThemeContext)
@@ -57,9 +58,15 @@ export default function(){
                     </Button>
                     </> : 
                     <>
+                    {DEVELOPMENT ? 
+                    <Button variant="outline-primary" onClick={authctx.onDevLogin}>
+                        Login
+                    </Button> : 
                     <Button variant="outline-primary" onClick={authctx.onLoginClick}>
                         Login
                     </Button>
+                    }
+                    
                     <Button variant="outline-primary" onClick={authctx.onRegisterClick}>
                         Register
                     </Button>

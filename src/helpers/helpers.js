@@ -85,3 +85,32 @@ export const hexStringToInt8Arr = function(hexString){
     } catch (error){}
     return Int8Array.from(int8arrBuffer)
 }
+
+export const playerCoordScale= function(i, w, h){
+    debugger/*
+    var scale_top = 0.15, scale_left = 0.15
+    if(i==0) return {scale_top: h*scale_top, scale_left: w*scale_left}
+    const separation = 2*(w+h)/6
+    for(var j = 1; j <= i || j < 6; j++){
+        let _st = (scale_top + separation), _sl = (scale_top + separation)
+        scale_top = _st > 1.0 ? 1.1 : 
+        scale_left = _sl > 1.0 ? 
+    }
+    return {scale_top: h*scale_top, scale_left: w*scale_left}*/
+    switch(i){
+        case 0:
+            return {scale_top: -0.2*h, scale_left: -0.3*w}
+        case 1:
+            return {scale_top: 0.2*h, scale_left: 0.4*w}
+        case 2:
+            return {scale_top: -0.2*h, scale_left: 1.1*w}
+        case 3:
+            return {scale_top: 0.0*h, scale_left: 0.4*w}
+        case 4:
+            return {scale_top: 0.0*h, scale_left: 0.4*w}
+        case 5:
+            return {scale_top: 0.0*h, scale_left: 0.4*w}
+        default:
+            throw new Error("Out of range of position")
+    }
+}

@@ -41,7 +41,7 @@ function Game(props){
                 }
                 _sock.onclose = (ev) =>{
                     dispatchState({type: "SOCKET_CLOSE"})
-                    _sock.send(JSON.stringify({user_id: authctx.user_id}))
+                    _sock.send(JSON.stringify({user_id: authctx.user_id, table_position: joinedPosition}))
                     alert("closed with event: " + ev.reason)
                 }
 
@@ -99,8 +99,7 @@ function Game(props){
     }
 
 
-    const joinHandler = function(position){
-        setJoinedPosition(position)
+    const joinSubmitHandler = function(){
         setJoinClicked(false)
         setJoined(true)
     }
@@ -120,10 +119,10 @@ function Game(props){
     return (
         <Fragment>
             <div className={classes.gameBackground} id="table-background">
-                <Table players={gameState.players.playerList} joined={joined} joinClickHandler={joinClickHandler}>
+                <Table players={gameState.players.playerList} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
                 </Table>
             </div>
-            <JoinForm joinHandler={joinHandler} closeHandler={formCloseHandler} show={authctx.isLoggedIn && joinClicked}/>
+            <JoinForm joinHandler={joinSubmitHandler} closeHandler={formCloseHandler} show={authctx.isLoggedIn && joinClicked}/>
         </Fragment>
     )
 }

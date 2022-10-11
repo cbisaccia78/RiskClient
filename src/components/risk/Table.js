@@ -2,7 +2,7 @@ import classes from './Table.module.css'
 import React, {useState, useEffect, Fragment} from 'react'
 import {tableGeometry, playerPartition, cardPartition} from '../../config'
 import riskboard from "../../RiskBoard.svg"
-import { isInsidePolygon } from "../../helpers/helpers"
+import { isInsidePolygon, playerCoordScale } from "../../helpers/helpers"
 import OpenSeat from './OpenSeat'
 import Player from './Player'
 import Hand from './Hand'
@@ -48,14 +48,14 @@ function Table(props){
       }, [])
 
     function calculateBB(){
-        //this needs to ensure that 1.444549393267134 ratio does not break
+        //this needs to ensure that 1.4447761194029851 ratio does not break
         let vpW = window.visualViewport.width
         let vpH = window.visualViewport.height
         let ratio = vpW / vpH
-        if(ratio < 1.444549393267134){ //reduce the height
-            vpH = vpW * (1/1.444549393267134) 
+        if(ratio < 1.4447761194029851){ //reduce the height
+            vpH = vpW * (1/1.4447761194029851) 
         }else{ //reduce the width
-            vpW = (1.444549393267134) * vpH
+            vpW = (1.4447761194029851) * vpH
         }
         return {
             height: tableGeometry.height*vpH,
@@ -70,18 +70,14 @@ function Table(props){
         playerCircles defined to be 10% of viewportHeight
 
         */
-        let real_height = boundingRect.height / 0.7
-        let real_width = boundingRect.width / 0.7
-        let square = real_height < real_width ? real_height : real_width
-        let scale = playerPartition[position]
-        let scale_x = scale[0]
-        let scale_y = scale[1]
+        let {height, left, top, width} = boundingRect
+        
+        let {scale_top, scale_left} = playerCoordScale(position, width, height)
 
+        let new_top = top + scale_top //scale_top = position == 1 ? 1+0.1, 2 
+        let new_left = left + scale_left//scale_left = position == 1 ? 1 + 0.15 
         
-        let new_top = real_height*scale_y
-        let new_left = real_width*scale_x
-        
-        
+        let square = height < width ? height : width
         return {top: new_top, left: new_left, width: 0.1*square, height: 0.1*square}
     }
 
@@ -108,7 +104,7 @@ function Table(props){
 
     for(var i = 0; i < 6 - num_players; i++){
         if(players[i] == null){
-            openSeatButtons.push(<OpenSeat key={`open-${i}`} joinClickHandler={props.joinClickHandler} position={i} generatePosition={playerPosition}/>)
+            openSeatButtons.push(<OpenSeat key={`open-${i}`} setJoinedPosition={props.setJoinedPosition} joinClickHandler={props.joinClickHandler} position={i} generatePosition={playerPosition.bind(this, i)}/>)
         }
     }
 
@@ -117,7 +113,7 @@ function Table(props){
             {players.filter(val => val != null).map((player) => {
                     return (
                     <Fragment>
-                        <Player key={`player-${player.position}`} data={player} generatePosition={playerPosition}/>
+                        <Player key={`player-${player.position}`} data={player} generatePosition={playerPosition.bind(this, player.position)}/>
                         {/*<Hand key={`hand-${player.position}`} hand={player.hand} playerPos={player.position} cardPosition={cardPosition}/>*/}
                     </Fragment>)
                 })

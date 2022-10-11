@@ -60,6 +60,35 @@ export function AuthContextProvider(props){
         
     }
 
+    const devLoginHandler = async function(){
+        var successful = false
+        //validate with server
+        var user_id = 0
+        try{
+            const res = await fetch("http://localhost:3001/login", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: 'dancing_ghosts', 
+                    password: 'password321!'
+                })
+            })//should be https eventually
+            const result = await res.json();
+            //console.log(result)
+            successful = result.success
+            user_id = successful ? result.user_id : 0
+            
+        } catch (error){
+            console.error(error)
+        }
+        setIsLoggedIn(successful)
+        setLoginError(!successful)
+        console.log(successful);
+        
+    }
+
     const loginClickHandler = function(){
         setIsLoggingIn(true)
     }
@@ -100,6 +129,7 @@ export function AuthContextProvider(props){
         isLoggedIn: isLoggedIn, isRegistering: isRegistering,
         isLoggingIn: isLoggingIn,  registerError: registerError, loginError: loginError,
         setIsRegistering: setIsRegistering, setIsLoggingIn: setIsLoggingIn,
+        onDevLogin: devLoginHandler,
         onLogin: loginHandler, onLoginClick : loginClickHandler, 
         onLogoutClick: logoutClickHandler, 
         onRegister: registerHandler, onRegisterClick: registerClickHandler,
