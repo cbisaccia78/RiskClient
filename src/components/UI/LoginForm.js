@@ -19,7 +19,7 @@ export default function(props){
         <Modal show={authctx.isLoggingIn} onHide={()=>{authctx.setIsLoggingIn(false)}}>
             <Modal.Dialog>
                 <Modal.Header closeButton>
-                    <Modal.Title>Register</Modal.Title>
+                    <Modal.Title>Login</Modal.Title>
                 </Modal.Header>
 
                 <Modal.Body>

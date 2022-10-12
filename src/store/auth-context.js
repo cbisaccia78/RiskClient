@@ -50,7 +50,7 @@ export function AuthContextProvider(props){
             //console.log(result)
             successful = result.success
             setId(successful ? result.user_id : 0)
-            setProfilePicBuffer(result.imageBinary? hexStringToInt8Arr(result.imageBinary).buffer : null) //need to add default 
+            setProfilePicBuffer(result.imageBinary.data) //need to add default 
 
         } catch (error){
             console.error(error)

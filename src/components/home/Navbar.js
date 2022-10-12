@@ -51,7 +51,7 @@ export default function(){
                     </Form>
                     {authctx.isLoggedIn ? 
                     <>
-                    <img style={{width: "100px", height: "100px"}} src={URL.createObjectURL(new Blob(authctx.profilePicBuffer,{type:"image"}))} />
+                    <img src={"data:image/png,base64,"+ btoa(new TextEncoder('utf-8').encode(new Uint8Array(authctx.profilePicBuffer)))} />
                     <Button variant="outline-primary" onClick={authctx.onProfileClick}>
                         Profile
                     </Button>

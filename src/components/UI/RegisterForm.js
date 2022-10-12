@@ -28,7 +28,7 @@ export default function(props){
             let fr = new FileReader()
             fr.onload = () => {
                 debugger
-                const int8arr = new Int8Array(fr.result)
+                const int8arr = new Uint8Array(fr.result)
                 const hexString = int8ArrToHexString(int8arr)
                 authctx.onRegister(fullName, userName, password, email, hexString)
             }
