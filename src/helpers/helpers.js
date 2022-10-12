@@ -86,7 +86,7 @@ export const hexStringToInt8Arr = function(hexString){
     return Int8Array.from(int8arrBuffer)
 }
 
-export const playerCoordScale= function(i, w, h){
+export const playerCoordScale= function(i){
     debugger/*
     var scale_top = 0.15, scale_left = 0.15
     if(i==0) return {scale_top: h*scale_top, scale_left: w*scale_left}
@@ -97,19 +97,22 @@ export const playerCoordScale= function(i, w, h){
         scale_left = _sl > 1.0 ? 
     }
     return {scale_top: h*scale_top, scale_left: w*scale_left}*/
+    
+
+    //need to calculate these positions exactly
     switch(i){
-        case 0:
-            return {scale_top: -0.2*h, scale_left: -0.3*w}
         case 1:
-            return {scale_top: 0.2*h, scale_left: 0.4*w}
+            return {scale_top: `${10}vh`, scale_left: `${-6}vw`, position: "absolute"} 
         case 2:
-            return {scale_top: -0.2*h, scale_left: 1.1*w}
+            return {scale_top: `${60}vh`, scale_left: `${-6}vw`, position: "absolute"}
         case 3:
-            return {scale_top: 0.0*h, scale_left: 0.4*w}
+            return {scale_top: `${84}vh`, scale_left: `${24}vw`, position: "absolute"}
         case 4:
-            return {scale_top: 0.0*h, scale_left: 0.4*w}
+            return {scale_top: `${84}vh`, scale_left: `${54}vw`, position: "absolute"}
         case 5:
-            return {scale_top: 0.0*h, scale_left: 0.4*w}
+            return {scale_top: `${60}vh`, scale_left: `${86}vw`, position: "absolute"}
+        case 6:
+            return {scale_top: `${10}vh`, scale_left: `${86}vw`, position: "absolute"}
         default:
             throw new Error("Out of range of position")
     }

@@ -13,7 +13,8 @@ function Player(props){
     </>
     )
     return (
-    createPortal(p, document.getElementById('root'))
+    //createPortal(
+        p//, document.getElementById('root'))
     )
 }
 

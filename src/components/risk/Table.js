@@ -24,45 +24,49 @@ function Table(props){
     let players = props.players
     //console.log(players);
     let num_players = players.filter(player=>player!=null).length
-    const [boundingRect, setBoundingRect] = useState(calculateBB())
+    const [VPR, setVPR] = useState(calculateVPR())
 
     useEffect(() => {
         const resizeHandler = (event) => {
-            let bb = calculateBB()
-            setBoundingRect(bb)
+            setVPR(calculateVPR())
         }
         window.addEventListener('resize', resizeHandler)
 
         return _ => {
             window.removeEventListener('resize', resizeHandler)
         }
-    })
+    }, VPR)
 
     useEffect(()=>{
         let img = document.createElement("img")
         img.src = riskboard
         img.className = "gameSVG"
+        img.id = "gameSVG"
         img.style = "height: 100%; width: 100%;"
         const t = document.getElementById("game-table")
         t.appendChild(img)
       }, [])
 
-    function calculateBB(){
+    function calculateVPR(){
         //this needs to ensure that 1.4447761194029851 ratio does not break
-        let vpW = window.visualViewport.width
-        let vpH = window.visualViewport.height
-        let ratio = vpW / vpH
+        /*
+        
         if(ratio < 1.4447761194029851){ //reduce the height
             vpH = vpW * (1/1.4447761194029851) 
         }else{ //reduce the width
             vpW = (1.4447761194029851) * vpH
         }
+        
         return {
             height: tableGeometry.height*vpH,
-            left: tableGeometry.left*vpW,
-            top: tableGeometry.top*vpH,
+            //left: tableGeometry.left*vpW,
+            //top: tableGeometry.top*vpH,
             width: tableGeometry.width*vpW
-        }
+        }*/
+        let vpW = window.visualViewport.width
+        let vpH = window.visualViewport.height
+        let ratio = vpW / vpH
+        return ratio
     }
     
     function playerPosition(position){
@@ -70,20 +74,16 @@ function Table(props){
         playerCircles defined to be 10% of viewportHeight
 
         */
-        let {height, left, top, width} = boundingRect
-        
-        let {scale_top, scale_left} = playerCoordScale(position, width, height)
 
-        let new_top = top + scale_top //scale_top = position == 1 ? 1+0.1, 2 
-        let new_left = left + scale_left//scale_left = position == 1 ? 1 + 0.15 
+        let {scale_top, scale_left} = playerCoordScale(position, VPR)
         
-        let square = height < width ? height : width
-        return {top: new_top, left: new_left, width: 0.1*square, height: 0.1*square}
+        let smaller = VPR < 1.0 ? '7.5vw' : '7.5vh'
+        return {top: scale_top, left: scale_left, width: `${smaller}`, height: `${smaller}`, position: "absolute"}
     }
 
     function cardPosition(playerPos, cardNum){
-        let real_height = boundingRect.height / 0.7
-        let real_width = boundingRect.width / 0.7
+        let real_height = 100//wrong
+        let real_width = 100//wrong
 
         let hand = cardPartition[playerPos]
         let scale = hand[cardNum-1]
@@ -104,12 +104,12 @@ function Table(props){
 
     for(var i = 0; i < 6 - num_players; i++){
         if(players[i] == null){
-            openSeatButtons.push(<OpenSeat key={`open-${i}`} setJoinedPosition={props.setJoinedPosition} joinClickHandler={props.joinClickHandler} position={i} generatePosition={playerPosition.bind(this, i)}/>)
+            openSeatButtons.push(<OpenSeat key={`open-${i}`} setJoinedPosition={props.setJoinedPosition} joinClickHandler={props.joinClickHandler} position={i+1} generatePosition={playerPosition.bind(this, i+1)}/>)
         }
     }
 
     return (
-        <div className={classes.gameTable} style={boundingRect} id="game-table" onClick = {determineCountry}>
+        <div className={classes.gameTable} id="game-table" onClick = {determineCountry}>
             {players.filter(val => val != null).map((player) => {
                     return (
                     <Fragment>

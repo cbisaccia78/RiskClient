@@ -9,10 +9,10 @@ function OpenSeat(props){
         props.setJoinedPosition(props.position)
     }
     return (
-    createPortal(
+    //createPortal(
     <button className="open-seat" style={props.generatePosition(props.position)} type="button" onClick={joinWithPosition}>
         Join
-    </button>, document.getElementById('root'))
+    </button>//, document.getElementById('root'))
     )
 }
 
