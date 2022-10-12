@@ -6,6 +6,7 @@ import Table from './Table'
 import classes from './Table.module.css'
 import { Fragment } from "react";
 import JoinForm from "../UI/JoinForm";
+import { hexStringToInt8Arr } from "../../helpers/helpers";
 import { randInt, range } from '../../helpers/helpers'
 import _ from "lodash"
 
@@ -87,9 +88,10 @@ function Game(props){
         }
     }
 
-    function addPlayer(prevState, player){
-        let players = _.cloneDeep(prevState.players.playerList)
-        let turn_stack = _.cloneDeep(prevState.players.turn_stack)
+    function addPlayer(prevState, _player){
+        let players = prevState.players.playerList
+        let turn_stack = prevState.players.turn_stack
+        let player = {..._player, profilePicBuffer: hexStringToInt8Arr(_player.imageBinary).buffer}
         players.splice(player.table_position, 0, player)
         return { ...prevState, players: players}
     }

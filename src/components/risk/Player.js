@@ -8,7 +8,9 @@ function Player(props){
     let p = (
     <>
         <button className='player' style={props.generatePosition(data.table_position)}>
-            {data.image ? <img src={data.image} /> : data.name}
+            {data.profilePic ? <img src={URL.createObjectURL(
+                new Blob([data.profilePicBuffer])
+            )} /> : data.name}
         </button>
     </>
     )

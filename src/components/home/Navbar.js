@@ -13,6 +13,7 @@ import { DEVELOPMENT } from "../../config";
 export default function(){
     const themectx = useContext(ThemeContext)
     const authctx = useContext(AuthContext)
+    debugger
     return (
         /*
         <nav style={{top: "100px", borderBottom: "solid 1px"}}>
@@ -50,6 +51,7 @@ export default function(){
                     </Form>
                     {authctx.isLoggedIn ? 
                     <>
+                    <img style={{width: "100px", height: "100px"}} src={URL.createObjectURL(new Blob(authctx.profilePicBuffer,{type:"image"}))} />
                     <Button variant="outline-primary" onClick={authctx.onProfileClick}>
                         Profile
                     </Button>

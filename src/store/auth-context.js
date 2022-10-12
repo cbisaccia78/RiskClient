@@ -1,5 +1,6 @@
 import React, { useState} from 'react'
 import { useEffect } from 'react'
+import { hexStringToInt8Arr } from '../helpers/helpers'
 
 const AuthContext = React.createContext({
     id: 0,
@@ -10,6 +11,7 @@ const AuthContext = React.createContext({
 
 export function AuthContextProvider(props){
     const [id, setId] = useState(0)
+    const [profilePicBuffer, setProfilePicBuffer] = useState([]) //need a default image here
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [isLoggingIn, setIsLoggingIn] = useState(false)
     const [loginError, setLoginError] = useState(false)
@@ -33,7 +35,6 @@ export function AuthContextProvider(props){
     const loginHandler = async function(userName, password){
         var successful = false
         //validate with server
-        var user_id = 0
         try{
             const res = await fetch("http://localhost:3001/login", {
                 method: 'POST',
@@ -48,8 +49,9 @@ export function AuthContextProvider(props){
             const result = await res.json();
             //console.log(result)
             successful = result.success
-            user_id = successful ? result.user_id : 0
-            
+            setId(successful ? result.user_id : 0)
+            setProfilePicBuffer(result.imageBinary? hexStringToInt8Arr(result.imageBinary).buffer : null) //need to add default 
+
         } catch (error){
             console.error(error)
         }
@@ -57,14 +59,13 @@ export function AuthContextProvider(props){
         setLoginError(!successful)
         setIsLoggingIn(!successful)
         console.log(successful);
-        
     }
 
     const devLoginHandler = async function(){
         var successful = false
         //validate with server
-        var user_id = 0
         try{
+            debugger
             const res = await fetch("http://localhost:3001/login", {
                 method: 'POST',
                 headers: {
@@ -78,7 +79,10 @@ export function AuthContextProvider(props){
             const result = await res.json();
             //console.log(result)
             successful = result.success
-            user_id = successful ? result.user_id : 0
+            setId(successful ? result.user_id : 0)
+            //setProfilePicBuffer(result.imageBinary ? hexStringToInt8Arr(result.imageBinary).buffer : "default") //need to add default 
+            setProfilePicBuffer(result.imageBinary.data) //need to add default 
+            console.log(profilePicBuffer);
             
         } catch (error){
             console.error(error)
@@ -126,6 +130,7 @@ export function AuthContextProvider(props){
     
     return <AuthContext.Provider value={{
         id: id,
+        profilePicBuffer: profilePicBuffer,
         isLoggedIn: isLoggedIn, isRegistering: isRegistering,
         isLoggingIn: isLoggingIn,  registerError: registerError, loginError: loginError,
         setIsRegistering: setIsRegistering, setIsLoggingIn: setIsLoggingIn,

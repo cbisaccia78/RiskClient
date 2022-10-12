@@ -1,5 +1,5 @@
 import classes from './Table.module.css'
-import React, {useState, useEffect, Fragment} from 'react'
+import React, {useState, useEffect, Fragment, useContext} from 'react'
 import {tableGeometry, playerPartition, cardPartition} from '../../config'
 import riskboard from "../../RiskBoard.svg"
 import { isInsidePolygon, playerCoordScale } from "../../helpers/helpers"
@@ -25,6 +25,7 @@ function Table(props){
     //console.log(players);
     let num_players = players.filter(player=>player!=null).length
     const [VPR, setVPR] = useState(calculateVPR())
+    const authctx = useContext(AuthContext)
 
     useEffect(() => {
         const resizeHandler = (event) => {
@@ -35,7 +36,7 @@ function Table(props){
         return _ => {
             window.removeEventListener('resize', resizeHandler)
         }
-    }, VPR)
+    }, [VPR])
 
     useEffect(()=>{
         let img = document.createElement("img")

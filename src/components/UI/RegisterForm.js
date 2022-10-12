@@ -16,13 +16,13 @@ export default function(props){
     const password = useRef('')
     const email = useRef('')
     const pictureInputRef = useRef()
+    
     */
     const handleClose = function(){
         const fullName = document.getElementById('registerName').value
         const userName = document.getElementById('registerUserName').value
         const password = document.getElementById('registerPassword').value
         const email = document.getElementById('registerEmail').value
-        debugger
         let f = document.getElementById('registerImage').files[0]
         if(f){
             let fr = new FileReader()

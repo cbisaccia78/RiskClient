@@ -65,6 +65,7 @@ export const hexStringToInt8Arr = function(hexString){
          val = hexString.split('\\x')[1] //error check this
          val.forEach
     */
+   debugger
    const int8arrBuffer = []
     try {
         const val = hexString.split('\\x')[1]
@@ -87,7 +88,7 @@ export const hexStringToInt8Arr = function(hexString){
 }
 
 export const playerCoordScale= function(i){
-    debugger/*
+    /*
     var scale_top = 0.15, scale_left = 0.15
     if(i==0) return {scale_top: h*scale_top, scale_left: w*scale_left}
     const separation = 2*(w+h)/6
