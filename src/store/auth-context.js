@@ -16,6 +16,7 @@ const AuthContext = React.createContext({
 
 export function AuthContextProvider(props){
     const [id, setId] = useState(0)
+    const [JWT, setJWT] = useState(null)
     const [profilePicBuffer, setProfilePicBuffer] = useState([]) //need a default image here
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [isLoggingIn, setIsLoggingIn] = useState(false)
@@ -55,6 +56,7 @@ export function AuthContextProvider(props){
             //console.log(result)
             successful = result.success
             setId(successful ? result.user_id : 0)
+            setJWT(result.JWT || null)
             setProfilePicBuffer(result.imageBinary) //need to add default 
 
         } catch (error){
@@ -85,6 +87,7 @@ export function AuthContextProvider(props){
             //console.log(result)
             successful = result.success
             setId(successful ? result.user_id : 0)
+            setJWT(result.JWT || null)
             //setProfilePicBuffer(result.imageBinary ? hexStringToInt8Arr(result.imageBinary).buffer : "default") //need to add default 
             setProfilePicBuffer(result.imageBinary) //need to add default 
             console.log(profilePicBuffer);
@@ -134,7 +137,7 @@ export function AuthContextProvider(props){
     }
     
     return <AuthContext.Provider value={{
-        id: id,
+        id: id, JWT: JWT,
         profilePicBuffer: profilePicBuffer,
         isLoggedIn: isLoggedIn, isRegistering: isRegistering,
         isLoggingIn: isLoggingIn,  registerError: registerError, loginError: loginError,
