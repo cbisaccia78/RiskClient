@@ -46,6 +46,54 @@ export const isInsidePolygon = function(polygon, mouseX, mouseY) {
     return c;
 }
 
+export const bufferToBase64 = function( buffer ) {
+    var binary = '';
+    var bytes = new Uint8Array( buffer );
+    var len = bytes.byteLength;
+    for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode( bytes[ i ] );
+    }
+    return window.btoa( binary );
+}
+
+export const base64ToHexString = function(b64String){
+    var hexString = '\\x'
+    let bFilter = 0xFF, mSig = 0xF0, lSig = 0xF
+    for(var i = 0; i < b64String.length; i++){
+        let twoB = b64String.charCodeAt(i)// && twoBFilter
+        for(var j = 0; j < 2; j++){
+            let b = (twoB >> (1-j)*8) && bFilter   
+            let ms = (mSig & b) >> 4
+            hexString += ms.toString(16)
+            let ls = (lSig & b)
+            hexString += ls.toString(16)
+        }
+    }
+}
+
+export const hexStringToBase64 = function(hexString){
+    var int8arrBuffer = []
+    const val = hexString.split('\\x')[1]
+    if(!val) return ""
+    try {
+        var mostSig = true
+        var n = 0
+        for(var i = 0; i < val.length; i++){
+            var half = Number.parseInt(val[i])
+            if(mostSig){
+                n = half << 4
+            }else{
+                n += half       
+                int8arrBuffer.push(n)
+                n = 0
+            }
+            mostSig = !mostSig
+        }
+        
+    } catch (error){}
+    return Int8Array.from(int8arrBuffer)
+}
+
 export const int8ArrToHexString = function(int8arr){
     const mostSig = 240
     const leastSig = 15

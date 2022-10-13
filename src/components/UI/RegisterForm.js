@@ -3,7 +3,7 @@ import Modal from 'react-bootstrap/modal'
 import Button from 'react-bootstrap/button'
 import Form from 'react-bootstrap/Form'
 import Alert from 'react-bootstrap/Alert'
-import { int8ArrToHexString } from "../../helpers/helpers";
+import { base64ToHexString, int8ArrToHexString } from "../../helpers/helpers";
 import { useContext } from "react";
 import AuthContext from "../../store/auth-context";
 
@@ -28,14 +28,13 @@ export default function(props){
             let fr = new FileReader()
             fr.onload = () => {
                 debugger
-                const int8arr = new Uint8Array(fr.result)
-                const hexString = int8ArrToHexString(int8arr)
-                authctx.onRegister(fullName, userName, password, email, hexString)
+                //const hexString = base64ToHexString(fr.result)
+                authctx.onRegister(fullName, userName, password, email, fr.result)//hexString)
             }
             fr.onerror = ()=>{
                 authctx.onRegister(fullName, userName, password, email, '\\x')
             }
-            fr.readAsArrayBuffer(f)
+            fr.readAsDataURL(f)
         }
         
         
