@@ -4,9 +4,14 @@ import { hexStringToInt8Arr } from '../helpers/helpers'
 
 const AuthContext = React.createContext({
     id: 0,
-    isLoggedIn: false,
-    onLogout: ()=> {},
-    onLogin: () => {},
+    profilePicBuffer: [],
+    isLoggedIn: false, isRegistering: false,
+    isLoggingIn: false,  registerError: false, loginError: false,
+    setIsRegistering: ()=> {}, setIsLoggingIn: ()=> {},
+    onDevLogin: ()=> {},
+    onLogin: ()=> {}, onLoginClick : ()=> {},
+    onLogoutClick: ()=> {},
+    onRegister: ()=> {}, onRegisterClick: ()=> {},
 })
 
 export function AuthContextProvider(props){
@@ -72,8 +77,8 @@ export function AuthContextProvider(props){
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    username: 'dancing_ghosts', 
-                    password: 'password321!'
+                    username: 'tt', 
+                    password: 'tt'
                 })
             })//should be https eventually
             const result = await res.json();
