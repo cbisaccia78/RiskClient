@@ -22,8 +22,8 @@ const determineCountry = (evt) => {
 function Table(props){
     //const authctx = useContext(AuthContext)
     let players = props.players
+    debugger
     //console.log(players);
-    let num_players = players.filter(player=>player!=null).length
     const [VPR, setVPR] = useState(calculateVPR())
     const authctx = useContext(AuthContext)
 
@@ -102,8 +102,8 @@ function Table(props){
 
     var openSeatButtons = []
     //console.log(num_players);
-
-    for(var i = 0; i < 6 - num_players; i++){
+    debugger
+    for(var i = 0; i < 6; i++){
         if(players[i] == null){
             openSeatButtons.push(<OpenSeat key={`open-${i}`} setJoinedPosition={props.setJoinedPosition} joinClickHandler={props.joinClickHandler} position={i+1} generatePosition={playerPosition.bind(this, i+1)}/>)
         }
@@ -114,7 +114,7 @@ function Table(props){
             {players.filter(val => val != null).map((player) => {
                     return (
                     <Fragment>
-                        <Player key={`player-${player.position}`} data={player} generatePosition={playerPosition.bind(this, player.position)}/>
+                        <Player key={`player-${player.table_position}`} data={player} generatePosition={playerPosition.bind(this, player.table_position)}/>
                         {/*<Hand key={`hand-${player.position}`} hand={player.hand} playerPos={player.position} cardPosition={cardPosition}/>*/}
                     </Fragment>)
                 })

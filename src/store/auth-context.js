@@ -83,7 +83,6 @@ export function AuthContextProvider(props){
                 })
             })//should be https eventually
             const result = await res.json();
-            debugger
             //console.log(result)
             successful = result.success
             setId(successful ? result.user_id : 0)

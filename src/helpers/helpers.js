@@ -1,3 +1,5 @@
+import _ from "lodash"
+
 export const print = function(arg){
     console.log(arg)
 }
@@ -149,6 +151,7 @@ export const playerCoordScale= function(i){
     
 
     //need to calculate these positions exactly
+    
     switch(i){
         case 1:
             return {scale_top: `${10}vh`, scale_left: `${-6}vw`, position: "absolute"} 
@@ -163,6 +166,68 @@ export const playerCoordScale= function(i){
         case 6:
             return {scale_top: `${10}vh`, scale_left: `${86}vw`, position: "absolute"}
         default:
+            debugger
             throw new Error("Out of range of position")
     }
+}
+
+export const insertTurn = function(turn_stack, assignedSeat){
+    
+    let l = turn_stack.length
+    const turnstack = _.cloneDeep(turn_stack)
+    
+    if(l == 0 || l == 1){
+        turnstack.push(assignedSeat)
+        return turnstack
+    }
+
+    var last = turnstack[0]
+    var curr = turnstack[1]
+    if(l == 2){
+        if(last < curr){
+            if(assignedSeat > last && assignedSeat < curr){ 
+                turnstack.splice(1, 0, assignedSeat)
+            }else{
+                turnstack.push(assignedSeat)
+            }
+        }else{
+            if(assignedSeat < last && assignedSeat > curr){
+                turnstack.push(assignedSeat)
+            }else{
+                turnstack.splice(1, 0, assignedSeat)
+            }
+        }
+        return turnstack
+    }
+
+    var i = 1
+
+    var modulated = false //did we go backwards in order ie) 6->1
+    while(i < l){ //l is at least 3
+        curr = turnstack[i]
+        modulated = curr < last
+        if(!modulated){//still going up
+            if(assignedSeat > last){
+                if(assignedSeat < curr){//in between
+                    turnstack.splice(i, 0, assignedSeat)
+                    return turnstack
+                }//else its greater than both, in which case need to increment
+            }//else we havent found the right position because we haven't modulated
+        }else{ //went backwards
+            if(assignedSeat < curr || assignedSeat > last){
+                turnstack.splice(i, 0, assignedSeat)
+                return turnstack
+            }
+        }
+        last = curr
+        i++
+    }
+
+    turnstack.push(assignedSeat)
+    return turnstack
+
+}
+
+export const deleteTurn = function(turn_stack, assignedSeat){
+    return turn_stack.filter((position) => assignedSeat != position)
 }

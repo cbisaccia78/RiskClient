@@ -1,6 +1,6 @@
 import Button from './Button'
-import AuthContext from '../../store/auth-context'
-import { useContext } from 'react';
+//import AuthContext from '../../store/auth-context'
+//import { useContext } from 'react';
 import React, { useState} from "react";
 import Modal from 'react-bootstrap/Modal'
 import Form from 'react-bootstrap/Form'
@@ -8,9 +8,13 @@ import Alert from 'react-bootstrap/Alert'
 
 
 function JoinForm(props){
-    const selectedColor = useState("")
-    const authctx = useContext(AuthContext)
+    const [selectedColor, setSelectedColor] = useState("")
+    //const authctx = useContext(AuthContext)
 
+    const joinWithColor = ()=>{
+        props.setLocalColor(selectedColor)
+        props.joinHandler()
+    }
     return (
         <Modal show={props.show} onHide={props.closeHandler}>
             <Modal.Dialog>
@@ -19,12 +23,19 @@ function JoinForm(props){
                 </Modal.Header>
 
                 <Modal.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="gameName">
-                            <Form.Label>Select Color</Form.Label>
-                            <Form.Control type="radio" placeholder="Enter username"/>
-                        </Form.Group>
-                    </Form>
+                    <Form.Label>Pick your color</Form.Label>
+                    <Form.Control
+                    as="select"
+                    custom="true"
+                    onChange={(e)=>{setSelectedColor(e.target.value)}}
+                    >
+                        <option value="blue" style={{backgroundColor: "blue"}}/>
+                        <option value="red" style={{backgroundColor: "red"}}/>
+                        <option value="yellow" style={{backgroundColor: "yellow"}}/>
+                        <option value="green" style={{backgroundColor: "green"}} />
+                        <option value="black" style={{backgroundColor: "black"}}/>
+                        <option value="orange" style={{backgroundColor: "orange"}}/>
+                    </Form.Control>
                 </Modal.Body>
 
                 <Modal.Footer>
@@ -33,7 +44,7 @@ function JoinForm(props){
                         Could not join game
                     </Alert> : <></>}
                     {/*<Link to="/game/0">Submit</Link>*/}
-                    <Button onClick={props.joinHandler}>Submit</Button>
+                    <Button onClick={joinWithColor}>Submit</Button>
                 </Modal.Footer>
             </Modal.Dialog>
         </Modal>

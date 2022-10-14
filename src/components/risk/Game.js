@@ -6,8 +6,7 @@ import Table from './Table'
 import classes from './Table.module.css'
 import { Fragment } from "react";
 import JoinForm from "../UI/JoinForm";
-import { hexStringToInt8Arr } from "../../helpers/helpers";
-import { randInt, range } from '../../helpers/helpers'
+import { randInt, range, insertTurn, deleteTurn} from '../../helpers/helpers'
 import _ from "lodash"
 
 
@@ -17,6 +16,7 @@ function Game(props){
     
     const [joinClicked, setJoinClicked] = useState(false)
     const [joined, setJoined] = useState(false)
+    const [localColor, setLocalColor] = useState(null)
     const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), players: {playerList: [null,null,null,null,null,null,], turn_stack: []}, deck: {}})
     const [joinedPosition, setJoinedPosition] = useState(-1)
     const [sock, setSock] = useState(null)
@@ -27,13 +27,22 @@ function Game(props){
     useEffect(function(){
         const establishConnection = async function(){
             if(joined || !local){
+                var gid = location.pathname.split("/")[2]
+                if(Number.isInteger(Number(gid))){
+                    gid = Number(gid)
+                }else{
+                    gid = 0
+                }
                 var ws_protos = [];
                 if(joined){
                     ws_protos = local ? ["CREATE"] : ["JOIN"]
+                }else{
+                    ws_protos.push("SPECTATE")
                 }
-                const _sock = new WebSocket(`ws://localhost:3001/gamesession/${gameState.id}/${authctx.id}`, ws_protos)// hardcoded gameid and userid, need to get dynamically
+                if(authctx.id > 0) ws_protos.push(authctx.JWT)
+                const _sock = new WebSocket(`ws://localhost:3001/gamesession/${gid}/${authctx.id}`, ws_protos)// hardcoded gameid and userid, need to get dynamically
                 _sock.onopen = ()=>{
-                    const payload = JSON.stringify({type: "GET_INITIAL_STATE"})
+                    const payload = JSON.stringify({type: "GET_INITIAL_STATE", joining: joined, user_id: authctx.id, color: localColor, JWT: authctx.JWT, icon: authctx.profilePicBuffer, table_position: joinedPosition})
                     _sock.send(payload)
                 }
                 _sock.onerror = (e)=>{
@@ -42,7 +51,7 @@ function Game(props){
                 }
                 _sock.onclose = (ev) =>{
                     dispatchState({type: "SOCKET_CLOSE"})
-                    _sock.send(JSON.stringify({user_id: authctx.user_id, table_position: joinedPosition}))
+                    _sock.send(JSON.stringify({user_id: authctx.id, table_position: joinedPosition}))
                     alert("closed with event: " + ev.reason)
                 }
 
@@ -87,17 +96,20 @@ function Game(props){
                 return prevState
         }
     }
-
-    function addPlayer(prevState, _player){
-        let players = prevState.players.playerList
-        let turn_stack = prevState.players.turn_stack
-        let player = {..._player, profilePicBuffer: hexStringToInt8Arr(_player.imageBinary).buffer}
-        players.splice(player.table_position, 0, player)
-        return { ...prevState, players: players}
+    
+    function addPlayer(prevState, player){
+        const playerList = _.cloneDeep(prevState.players.playerList)
+        const turn_stack = _.cloneDeep(prevState.players.turn_stack)
+        playerList[player.table_position] = player
+        return {...prevState, players: {playerList: playerList, turn_stack: insertTurn(turn_stack, player.table_position)}}
     }
 
     function removePlayer(prevState, player){
-
+        const playerList = _.cloneDeep(prevState.players.playerList)
+        const turn_stack = _.cloneDeep(prevState.players.turn_stack)
+        const pos = player.table_position
+        playerList.splice(pos-1, 1, null)
+        return {...prevState, players: {playerList: playerList, turn_stack: deleteTurn(turn_stack, pos)}}
     }
 
 
@@ -124,7 +136,7 @@ function Game(props){
                 <Table players={gameState.players.playerList} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
                 </Table>
             </div>
-            <JoinForm joinHandler={joinSubmitHandler} closeHandler={formCloseHandler} show={authctx.isLoggedIn && joinClicked}/>
+            <JoinForm joinHandler={joinSubmitHandler}  setLocalColor={setLocalColor} closeHandler={formCloseHandler} show={authctx.isLoggedIn && joinClicked}/>
         </Fragment>
     )
 }
@@ -142,7 +154,8 @@ export function loader({ params }){
             
         //}
         //return worker
-        return gameId
+        
+        return gameId ? gameId : 0
     } catch (error){
         throw redirect("/")
     }
