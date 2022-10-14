@@ -26,45 +26,57 @@ function Game(props){
 
     useEffect(function(){
         const establishConnection = async function(){
-            if(joined || !local){
-                var gid = location.pathname.split("/")[2]
-                if(Number.isInteger(Number(gid))){
-                    gid = Number(gid)
-                }else{
-                    gid = 0
-                }
-                var ws_protos = [];
-                if(joined){
-                    ws_protos = local ? ["CREATE"] : ["JOIN"]
-                }else{
-                    ws_protos.push("SPECTATE")
-                }
-                if(authctx.id > 0) ws_protos.push(authctx.JWT)
-                const _sock = new WebSocket(`ws://localhost:3001/gamesession/${gid}/${authctx.id}`, ws_protos)// hardcoded gameid and userid, need to get dynamically
-                _sock.onopen = ()=>{
-                    const payload = JSON.stringify({type: "GET_INITIAL_STATE", joining: joined, user_id: authctx.id, color: localColor, JWT: authctx.JWT, icon: authctx.profilePicBuffer, table_position: joinedPosition})
-                    _sock.send(payload)
-                }
-                _sock.onerror = (e)=>{
-                    dispatchState({type: "SOCKET_ERROR"})
-                    console.log(e.message)
-                }
-                _sock.onclose = (ev) =>{
-                    dispatchState({type: "SOCKET_CLOSE"})
-                    _sock.send(JSON.stringify({user_id: authctx.id, table_position: joinedPosition}))
-                    alert("closed with event: " + ev.reason)
-                }
-
-                _sock.onmessage = function(message){
-                    const payload = message.data
-                    dispatchState(payload ? JSON.parse(payload) : {type: "NoAct"})
-                }.bind(this)
-
-                setSock(_sock)
+            if(joined){
+                let action = {type: "JOIN", user_id: authctx.id, JWT: authctx.JWT, player: { color: localColor,  icon: authctx.profilePicBuffer, table_position: joinedPosition}}
+                sock.send(JSON.stringify(action))
             }
         }
         establishConnection()
     }.bind(this), [joined])
+
+    useEffect(function(){
+        const establishConnection = async function(){
+            var gid = location.pathname.split("/")[2]
+            if(Number.isInteger(Number(gid))){
+                gid = Number(gid)
+            }else{
+                gid = 0
+            }
+            if(!authctx.isLoggedIn && gid == 0){
+                return
+            }
+            //now, either unauthenticated and remote, authenticated and local / remote
+            var ws_protos = [];
+            if(gid == 0){
+                ws_protos.push("CREATE")
+            }else{
+                ws_protos.push("SPECTATE")
+            }
+            if(authctx.id > 0) ws_protos.push(authctx.JWT)
+            const _sock = new WebSocket(`ws://localhost:3001/gamesession/${gid}/${authctx.id}`, ws_protos)// hardcoded gameid and userid, need to get dynamically
+            _sock.onopen = ()=>{
+                const payload = JSON.stringify({type: "GET_INITIAL_STATE", user_id: authctx.id})
+                _sock.send(payload)
+            }
+            _sock.onerror = (e)=>{
+                dispatchState({type: "SOCKET_ERROR"})
+                console.log(e.message)
+            }
+            _sock.onclose = (ev) =>{
+                dispatchState({type: "SOCKET_CLOSE"})
+                _sock.send(JSON.stringify({user_id: authctx.id, table_position: joinedPosition}))
+                alert("closed with event: " + ev.reason)
+            }
+
+            _sock.onmessage = function(message){
+                const payload = message.data
+                dispatchState(payload ? JSON.parse(payload) : {type: "NoAct"})
+            }.bind(this)
+            setSock(_sock)
+
+        }
+        establishConnection()
+    }.bind(this), [])
 
     useEffect(function(){
         console.log(location)
