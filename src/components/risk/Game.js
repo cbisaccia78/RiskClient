@@ -112,7 +112,7 @@ function Game(props){
     function addPlayer(prevState, player){
         const playerList = _.cloneDeep(prevState.players.playerList)
         const turn_stack = _.cloneDeep(prevState.players.turn_stack)
-        playerList[player.table_position] = player
+        playerList[player.table_position-1] = player
         return {...prevState, players: {playerList: playerList, turn_stack: insertTurn(turn_stack, player.table_position)}}
     }
 
@@ -120,7 +120,7 @@ function Game(props){
         const playerList = _.cloneDeep(prevState.players.playerList)
         const turn_stack = _.cloneDeep(prevState.players.turn_stack)
         const pos = player.table_position
-        playerList.splice(pos-1, 1, null)
+        playerList[pos-1] = null
         return {...prevState, players: {playerList: playerList, turn_stack: deleteTurn(turn_stack, pos)}}
     }
 
