@@ -5,10 +5,11 @@ import { hexStringToInt8Arr } from '../helpers/helpers'
 const AuthContext = React.createContext({
     id: 0,
     profilePicBuffer: [],
+    gameGlobals: {inGame: false, awayTooLong: false, awayFromGameTimer: 0},
     isLoggedIn: false, isRegistering: false,
     isLoggingIn: false,  registerError: false, loginError: false,
     setIsRegistering: ()=> {}, setIsLoggingIn: ()=> {},
-    onDevLogin: ()=> {},
+    onDevLogin: ()=> {}, setGameGlobals: ()=>{},
     onLogin: ()=> {}, onLoginClick : ()=> {},
     onLogoutClick: ()=> {},
     onRegister: ()=> {}, onRegisterClick: ()=> {},
@@ -18,6 +19,7 @@ export function AuthContextProvider(props){
     const [id, setId] = useState(0)
     const [JWT, setJWT] = useState(null)
     const [profilePicBuffer, setProfilePicBuffer] = useState([]) //need a default image here
+    const [gameGlobals, setGameGlobals] = useState({inGame: false, awayTooLong: false, awayFromGameTimer: 0})
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [isLoggingIn, setIsLoggingIn] = useState(false)
     const [loginError, setLoginError] = useState(false)
@@ -26,9 +28,10 @@ export function AuthContextProvider(props){
 
     
     useEffect(function(){
-        const cached_login = localStorage.getItem("riskuser") 
-        if(cached_login){
-            setId(cached_login.id)
+        const cached_session = localStorage.getItem("risksession") 
+        if(cached_session){
+            setId(cached_session.id)
+            setGameGlobals({...gameGlobals, inGame: cached_session.inGame})
             setIsLoggedIn(true)
         }
     }.bind(this), [])
@@ -137,10 +140,12 @@ export function AuthContextProvider(props){
     
     return <AuthContext.Provider value={{
         id: id, JWT: JWT,
+        gameGlobals: gameGlobals,
         profilePicBuffer: profilePicBuffer,
         isLoggedIn: isLoggedIn, isRegistering: isRegistering,
         isLoggingIn: isLoggingIn,  registerError: registerError, loginError: loginError,
         setIsRegistering: setIsRegistering, setIsLoggingIn: setIsLoggingIn,
+        setGameGlobals: setGameGlobals,
         onDevLogin: devLoginHandler,
         onLogin: loginHandler, onLoginClick : loginClickHandler, 
         onLogoutClick: logoutClickHandler, 

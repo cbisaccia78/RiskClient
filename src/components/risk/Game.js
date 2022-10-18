@@ -36,6 +36,7 @@ function Game(props){
 
     useEffect(function(){
         const establishConnection = async function(){
+            
             var gid = location.pathname.split("/")[2]
             if(Number.isInteger(Number(gid))){
                 gid = Number(gid)
@@ -45,6 +46,7 @@ function Game(props){
             if(!authctx.isLoggedIn && gid == 0){
                 return
             }
+
             //now, either unauthenticated and remote, authenticated and local / remote
             var ws_protos = [];
             if(gid == 0){
@@ -75,14 +77,15 @@ function Game(props){
             setSock(_sock)
 
         }
-        establishConnection()
+        let gg = authctx.gameGlobals
+        if(gg.inGame){//made it back in time, don't cancel game
+            clearTimeout(gg.awayFromGameTimer)
+        }else{
+            establishConnection()
+            authctx.setGameGlobals({...gg, inGame: true})
+        }
+        
     }.bind(this), [])
-
-    useEffect(function(){
-        console.log(location)
-        //if(location.pathname != ['/game/create')sock.close("USER/LEFTPAGE")//is this async? 
-        //setSock(null) //if so need to make sure this doesnt cause race condition
-    }, [location])
 
     
     function stateReducer(prevState, action){
