@@ -5,7 +5,7 @@ import { hexStringToInt8Arr } from '../helpers/helpers'
 const AuthContext = React.createContext({
     id: 0,
     profilePicBuffer: [],
-    gameGlobals: {inGame: false, awayTooLong: false, awayFromGameTimer: 0},
+    gameGlobals: {inGame: false, gameId: 0, awayTooLong: false, awayFromGameTimer: 0},
     isLoggedIn: false, isRegistering: false,
     isLoggingIn: false,  registerError: false, loginError: false,
     setIsRegistering: ()=> {}, setIsLoggingIn: ()=> {},
@@ -19,7 +19,7 @@ export function AuthContextProvider(props){
     const [id, setId] = useState(0)
     const [JWT, setJWT] = useState(null)
     const [profilePicBuffer, setProfilePicBuffer] = useState([]) //need a default image here
-    const [gameGlobals, setGameGlobals] = useState({inGame: false, awayTooLong: false, awayFromGameTimer: 0})
+    const [gameGlobals, setGameGlobals] = useState({inGame: false, gameId: 0, awayTooLong: false, awayFromGameTimer: 0})
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [isLoggingIn, setIsLoggingIn] = useState(false)
     const [loginError, setLoginError] = useState(false)
@@ -30,8 +30,8 @@ export function AuthContextProvider(props){
     useEffect(function(){
         const cached_session = localStorage.getItem("risksession") 
         if(cached_session){
-            setId(cached_session.id)
-            setGameGlobals({...gameGlobals, inGame: cached_session.inGame})
+            setId(cached_session.user_id)
+            setGameGlobals({...gameGlobals, inGame: cached_session.inGame, gameId: cached_session.gameId})
             setIsLoggedIn(true)
         }
     }.bind(this), [])

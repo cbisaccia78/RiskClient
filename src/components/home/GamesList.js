@@ -25,7 +25,6 @@ export default function(props){
         }
         getGames()
     }.bind(this), [])
-    console.log(gameList)
     return (
     <Table hover striped>
         <thead>

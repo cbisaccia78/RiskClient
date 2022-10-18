@@ -101,7 +101,6 @@ function Table(props){
 
     var openSeatButtons = []
     //console.log(num_players);
-    debugger
     for(var i = 0; i < 6; i++){
         if(players[i] == null){
             openSeatButtons.push(<OpenSeat key={`open-${i}`} setJoinedPosition={props.setJoinedPosition} joinClickHandler={props.joinClickHandler} position={i+1} generatePosition={playerPosition.bind(this, i+1)}/>)

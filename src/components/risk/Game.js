@@ -6,7 +6,7 @@ import Table from './Table'
 import classes from './Table.module.css'
 import { Fragment } from "react";
 import JoinForm from "../UI/JoinForm";
-import { randInt, range, insertTurn, deleteTurn} from '../../helpers/helpers'
+import {insertTurn, deleteTurn} from '../../helpers/helpers'
 import _ from "lodash"
 
 
@@ -17,7 +17,7 @@ function Game(props){
     const [joinClicked, setJoinClicked] = useState(false)
     const [joined, setJoined] = useState(false)
     const [localColor, setLocalColor] = useState(null)
-    const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), players: {playerList: [null,null,null,null,null,null,], turn_stack: []}, deck: {}})
+    const [gameState, dispatchState] = useReducer(stateReducer.bind(this), { id: joined ? 0 : useLoaderData(), players: {playerList: [null,null,null,null,null,null,], turn_stack: []}, deck: {}})
     const [joinedPosition, setJoinedPosition] = useState(-1)
     const [sock, setSock] = useState(null)
     const authctx = useContext(AuthContext)
@@ -71,8 +71,14 @@ function Game(props){
             }
 
             _sock.onmessage = function(message){
-                const payload = message.data
-                dispatchState(payload ? JSON.parse(payload) : {type: "NoAct"})
+                const payload = JSON.parse(message.data)
+                if(payload.type == "INFO/GAMEID"){
+                    console.log(payload);
+                    authctx.setGameGlobals({...gg, inGame: true, gameId: payload.gameId})
+                }else{
+                    dispatchState(payload || {type: "NoAct"})
+                }
+                
             }.bind(this)
             setSock(_sock)
 
@@ -82,7 +88,6 @@ function Game(props){
             clearTimeout(gg.awayFromGameTimer)
         }else{
             establishConnection()
-            authctx.setGameGlobals({...gg, inGame: true})
         }
         
     }.bind(this), [])

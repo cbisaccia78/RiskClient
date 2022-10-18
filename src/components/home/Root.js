@@ -11,15 +11,18 @@ import { useLocation } from 'react-router-dom'
 export default function(){
     const authctx = useContext(AuthContext)
     const location = useLocation()
-    useEffect(async function(){
-        if(authctx.inGame && location.pathname != '/game/create' && authctx.awayFromGameTimer ){
-            let timerVal = setTimeout(function(authctx){
-                authctx.setGameGlobals({awayFromGameTimer: 0, inGame: false, awayTooLong: true})
-            }.bind(this, authctx), 45)
-            authctx.setGameGlobals({...(authctx.gameGlobals), awayFromGameTimer: timerVal})
+    useEffect(function(){
+        const gameTimeout = async function(){
+            if(authctx.inGame && location.pathname != '/game/create' && authctx.awayFromGameTimer ){
+                let timerVal = setTimeout(function(authctx){
+                    authctx.setGameGlobals({awayFromGameTimer: 0, inGame: false, awayTooLong: true})
+                }.bind(this, authctx), 45)
+                authctx.setGameGlobals({...(authctx.gameGlobals), awayFromGameTimer: timerVal})
+            }
+            //if(location.pathname != ['/game/create')sock.close("USER/LEFTPAGE")//is this async? 
+            //setSock(null) //if so need to make sure this doesnt cause race condition
         }
-        //if(location.pathname != ['/game/create')sock.close("USER/LEFTPAGE")//is this async? 
-        //setSock(null) //if so need to make sure this doesnt cause race condition
+        gameTimeout()
     }, [location])
     return (
         <div>

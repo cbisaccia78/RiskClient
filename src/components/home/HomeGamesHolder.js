@@ -11,30 +11,38 @@ import Alert from 'react-bootstrap/Alert'
 
 export default function(){
     const [createClicked, setCreateClicked] = useState(false)
+    const [rejoinClicked, setRejoinClicked] = useState(false)
     const authctx = useContext(AuthContext)
-    return ( createClicked && authctx.isLoggedIn ? <Navigate replace to="/game/create"/> :
-    <div className="HomeGamesHolder">
-        {
-            authctx.awayFromGameTimer ? 
-            <>
-                <Alert variant="danger">
-                    CURRENTLY IN GAME
-                </Alert> 
-                <Button variant="danger">Return to Game</Button>
-            </>:
-            <>
-                <GamesList/>
-                <Button variant="primary" onClick={()=>{setCreateClicked(true)}}>Create Game</Button>
-                {createClicked && !(authctx.isLoggedIn) ? 
-                    <Alert variant="danger">
-                        Must be logged in to create game
-                    </Alert> : <></>
+    return ( 
+        createClicked && authctx.isLoggedIn ? 
+            <Navigate replace to="/game/create"/> 
+        :
+            <div className="HomeGamesHolder">
+                {
+                    authctx.gameGlobals.gameId ? 
+                        rejoinClicked ? 
+                            <Navigate replace to={`/game/${authctx.gameGlobals.gameId}/${authctx.id}`}/>
+                        :
+                            <>
+                                <Alert variant="danger">
+                                    CURRENTLY IN GAME
+                                </Alert> 
+                                <Button variant="danger" onClick={function(){setRejoinClicked(true)}.bind(this)}>Return to Game</Button>
+                            </>
+                    :
+                        <>
+                            <GamesList/>
+                            <Button variant="primary" onClick={()=>{setCreateClicked(true)}}>Create Game</Button>
+                            {createClicked && !(authctx.isLoggedIn) ? 
+                                <Alert variant="danger">
+                                    Must be logged in to create game
+                                </Alert> : <></>
+                            }
+                        </>
+                    
                 }
-            </>
-            
-        }
-        
-        {/*<GameForm show={createClicked} onClose={()=>{setCreateClicked(false)}}/>*/}
-    </div>
+                
+                {/*<GameForm show={createClicked} onClose={()=>{setCreateClicked(false)}}/>*/}
+            </div>
     )
 }
