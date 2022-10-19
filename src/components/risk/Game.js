@@ -7,17 +7,18 @@ import classes from './Table.module.css'
 import { Fragment } from "react";
 import JoinForm from "../UI/JoinForm";
 import {insertTurn, deleteTurn} from '../../helpers/helpers'
+import {socketManager} from "../../helpers/SocketManager";
 import _ from "lodash"
 
 
 
 function Game(props){
-    const [local, setLocal] = useState(props.local || false) //use eventually to allow spectators
+    //const [local, setLocal] = useState(props.local || false) //use eventually to allow spectators
     
     const [joinClicked, setJoinClicked] = useState(false)
     const [joined, setJoined] = useState(false)
     const [localColor, setLocalColor] = useState(null)
-    const [gameState, dispatchState] = useReducer(stateReducer.bind(this), { id: joined ? 0 : useLoaderData(), players: {playerList: [null,null,null,null,null,null,], turn_stack: []}, deck: {}})
+    const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), players: {playerList: [null,null,null,null,null,null,], turn_stack: []}, deck: {}})
     const [joinedPosition, setJoinedPosition] = useState(-1)
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
@@ -27,10 +28,11 @@ function Game(props){
         const establishConnection = async function(){
             if(joined){
                 let action = {type: "JOIN", user_id: authctx.id, JWT: authctx.JWT, player: { color: localColor,  icon: authctx.profilePicBuffer, table_position: joinedPosition}}
-                authctx.gameGlobals.sock.send(JSON.stringify(action))
+                socketManager.send(JSON.stringify(action))
             }
         }
         establishConnection()
+        
     }.bind(this), [joined])
 
     useEffect(function(){
@@ -55,40 +57,21 @@ function Game(props){
             }
             if(authctx.id > 0) ws_protos.push(authctx.JWT)
             const _sock = new WebSocket(`ws://localhost:3001/gamesession/${gid}/${authctx.id}`, ws_protos)// hardcoded gameid and userid, need to get dynamically
-            _sock.onopen = ()=>{
-                const payload = JSON.stringify({type: "GET_INITIAL_STATE", user_id: authctx.id})
-                _sock.send(payload)
-            }
-            _sock.onerror = (e)=>{
-                dispatchState({type: "SOCKET_ERROR"})
-                console.log(e.message)
-            }
-            _sock.onclose = (ev) =>{
-                dispatchState({type: "SOCKET_CLOSE"})
-                _sock.send(JSON.stringify({user_id: authctx.id, table_position: joinedPosition}))
-                alert("closed with event: " + ev.reason)
-            }
-
-            _sock.onmessage = function(message){
-                const payload = JSON.parse(message.data)
-                if(payload.type == "INFO/GAMEID"){
-                    console.log(payload);
-                    authctx.setGameGlobals({...gg, inGame: true, gameId: payload.gameId})
-                }else{
-                    dispatchState(payload || {type: "NoAct"})
-                }
-                
-            }.bind(this)
-            authctx.setGameGlobals({...authctx.gameGlobals, sock: _sock})
-
+            debugger
+            bindSocket(_sock);
+            socketManager.setSocket(_sock)
         }
         let gg = authctx.gameGlobals
-        if(gg.inGame){
+        if(gg.inGame || gg.sock){
+            debugger
             clearTimeout(gg.awayFromGameTimer)//made it back in time, don't cancel game
-            restoreState() //rejoin locally but don't notify server
+            bindSocket(gg.sock)
+            authctx.setGameGlobals({...authctx.gameGlobals, sock: gg.sock})
+            restoreState()
         }else{
             establishConnection()
         }
+        //return () => {debugger}
         /*
         return function cleanUp(){
             var unfinished = true // need to determine actual value for this boolean
@@ -125,6 +108,33 @@ function Game(props){
         }
     }
     
+    function bindSocket(_sock){
+        _sock.onopen = function(){
+            const payload = JSON.stringify({type: "GET_INITIAL_STATE", user_id: authctx.id})
+            _sock.send(payload)
+        }
+        _sock.onerror = function(e){
+            dispatchState({type: "SOCKET_ERROR"})
+            console.log(e.message)
+        }
+        _sock.onclose = function(ev){
+            dispatchState({type: "SOCKET_CLOSE"})
+            _sock.send(JSON.stringify({user_id: authctx.id, table_position: joinedPosition}))
+            alert("closed with event: " + ev.reason)
+        }
+
+        _sock.onmessage = function(message){
+            const payload = JSON.parse(message.data)
+            if(payload.type == "INFO/GAMEID"){
+                console.log(payload);
+                authctx.setGameGlobals({...authctx.gameGlobals, inGame: true, gameId: payload.gameId})
+            }else{
+                dispatchState(payload || {type: "NoAct"})
+            }
+            
+        }
+    }
+
     function addPlayer(prevState, player){
         const playerList = _.cloneDeep(prevState.players.playerList)
         const turn_stack = _.cloneDeep(prevState.players.turn_stack)
@@ -147,7 +157,8 @@ function Game(props){
     }
 
     async function restoreState(){
-        authctx.sock.send(JSON.stringify({type: "GET_INITIAL_STATE", user_id: authctx.id}))
+        debugger
+        authctx.gameGlobals.sock.send(JSON.stringify({type: "GET_INITIAL_STATE", user_id: authctx.id}))
     }
 
     const joinSubmitHandler = function(){

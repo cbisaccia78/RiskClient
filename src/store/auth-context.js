@@ -1,6 +1,6 @@
 import React, { useState} from 'react'
 import { useEffect } from 'react'
-import { hexStringToInt8Arr } from '../helpers/helpers'
+//import { hexStringToInt8Arr } from '../helpers/helpers'
 
 const AuthContext = React.createContext({
     id: 0,
@@ -19,7 +19,7 @@ export function AuthContextProvider(props){
     const [id, setId] = useState(0)
     const [JWT, setJWT] = useState(null)
     const [profilePicBuffer, setProfilePicBuffer] = useState([]) //need a default image here
-    const [gameGlobals, setGameGlobals] = useState({inGame: false, gameId: 0, awayTooLong: false, awayFromGameTimer: 0, cachedState: null, sock: null})
+    const [gameGlobals, setGameGlobals] = useState({inGame: false, gameId: 0, awayTooLong: false, awayFromGameTimer: 0, cachedState: null})
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [isLoggingIn, setIsLoggingIn] = useState(false)
     const [loginError, setLoginError] = useState(false)
@@ -31,7 +31,7 @@ export function AuthContextProvider(props){
         const cached_session = localStorage.getItem("risksession") 
         if(cached_session){
             setId(cached_session.user_id)
-            setGameGlobals({...gameGlobals, inGame: cached_session.inGame, gameId: cached_session.gameId, sock: null})
+            setGameGlobals({...cached_session.gameGlobals})
             setIsLoggedIn(true)
         }
     }.bind(this), [])
@@ -137,6 +137,12 @@ export function AuthContextProvider(props){
     const registerClickHandler = function(){
         setIsRegistering(true)
     }
+
+    function createSocket(gid, ws_protos){
+        debugger
+        const _sock = new WebSocket(`ws://localhost:3001/gamesession/${gid}/${id}`, ws_protos)// hardcoded gameid and userid, need to get dynamically
+        setGameGlobals({...gameGlobals, sock: _sock})
+    }
     
     return <AuthContext.Provider value={{
         id: id, JWT: JWT,
@@ -145,7 +151,7 @@ export function AuthContextProvider(props){
         isLoggedIn: isLoggedIn, isRegistering: isRegistering,
         isLoggingIn: isLoggingIn,  registerError: registerError, loginError: loginError,
         setIsRegistering: setIsRegistering, setIsLoggingIn: setIsLoggingIn,
-        setGameGlobals: setGameGlobals,
+        setGameGlobals: setGameGlobals, createSocket: createSocket,
         onDevLogin: devLoginHandler,
         onLogin: loginHandler, onLoginClick : loginClickHandler, 
         onLogoutClick: logoutClickHandler, 

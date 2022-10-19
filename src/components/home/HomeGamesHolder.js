@@ -13,7 +13,6 @@ export default function(){
     const [createClicked, setCreateClicked] = useState(false)
     const [rejoinClicked, setRejoinClicked] = useState(false)
     const authctx = useContext(AuthContext)
-    debugger
     return ( 
         createClicked && authctx.isLoggedIn ? 
             <Navigate replace to="/game/create"/> 
