@@ -19,7 +19,6 @@ function Game(props){
     const [localColor, setLocalColor] = useState(null)
     const [gameState, dispatchState] = useReducer(stateReducer.bind(this), { id: joined ? 0 : useLoaderData(), players: {playerList: [null,null,null,null,null,null,], turn_stack: []}, deck: {}})
     const [joinedPosition, setJoinedPosition] = useState(-1)
-    const [sock, setSock] = useState(null)
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
     const location = useLocation();
@@ -28,7 +27,7 @@ function Game(props){
         const establishConnection = async function(){
             if(joined){
                 let action = {type: "JOIN", user_id: authctx.id, JWT: authctx.JWT, player: { color: localColor,  icon: authctx.profilePicBuffer, table_position: joinedPosition}}
-                sock.send(JSON.stringify(action))
+                authctx.gameGlobals.sock.send(JSON.stringify(action))
             }
         }
         establishConnection()
@@ -80,15 +79,22 @@ function Game(props){
                 }
                 
             }.bind(this)
-            setSock(_sock)
+            authctx.setGameGlobals({...authctx.gameGlobals, sock: _sock})
 
         }
         let gg = authctx.gameGlobals
-        if(gg.inGame){//made it back in time, don't cancel game
-            clearTimeout(gg.awayFromGameTimer)
+        if(gg.inGame){
+            clearTimeout(gg.awayFromGameTimer)//made it back in time, don't cancel game
+            restoreState() //rejoin locally but don't notify server
         }else{
             establishConnection()
         }
+        /*
+        return function cleanUp(){
+            var unfinished = true // need to determine actual value for this boolean
+            if(unfinished)authctx.setGameGlobals({...authctx.gameGlobals, cachedState: gameState})
+        }
+        */
         
     }.bind(this), [])
 
@@ -98,6 +104,8 @@ function Game(props){
             case 'INITIALIZE_GAME':
                 //console.log(action.state)
                 return {...prevState, ...(action.state)}
+            case 'RESTORE':
+                return action.state
             case 'PLAYER_CHANGE/ADD':
                 return addPlayer(prevState, action.player)
             case 'PLAYER_CHANGE/REMOVE':
@@ -132,6 +140,15 @@ function Game(props){
         return {...prevState, players: {playerList: playerList, turn_stack: deleteTurn(turn_stack, pos)}}
     }
 
+    function restoreCachedState(){
+        let state = authctx.gameGlobals.cachedState
+        dispatchState({type: "RESTORE", state: state})
+        authctx.setGameGlobals({...state, cachedState : null})
+    }
+
+    async function restoreState(){
+        authctx.sock.send(JSON.stringify({type: "GET_INITIAL_STATE", user_id: authctx.id}))
+    }
 
     const joinSubmitHandler = function(){
         setJoinClicked(false)
