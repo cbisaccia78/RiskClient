@@ -29,8 +29,8 @@ function Game(props){
     useEffect(function(){
         const establishConnection = async function(){
             if(joined){
-                let action = {type: "JOIN", user_id: authctx.id, JWT: authctx.JWT, player: { color: localColor,  icon: authctx.profilePicBuffer, table_position: joinedPosition}}
-                socketManager.send(JSON.stringify(action))
+                let action = {type: "JOIN", user_id: authctx.id, player: { color: localColor,  icon: authctx.profilePicBuffer, table_position: joinedPosition}}
+                socketManager.send(action)
             }
         }
         establishConnection()
@@ -83,6 +83,12 @@ function Game(props){
         */
         
     }.bind(this), [])
+
+    useEffect(function(){
+        if(timerExpired){
+            socketManager.send({type: "ACTION", user_id: authctx.id, action: {type: "NOOP"}})
+        }
+    }, timerExpired)
 
     
     function stateReducer(prevState, action){
@@ -166,8 +172,7 @@ function Game(props){
     }
 
     async function restoreState(){
-        debugger
-        socketManager.send(JSON.stringify({type: "GET_INITIAL_STATE", user_id: authctx.id}))
+        socketManager.send({type: "GET_INITIAL_STATE", user_id: authctx.id})
     }
 
     const joinSubmitHandler = function(){
