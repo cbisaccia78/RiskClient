@@ -3,6 +3,7 @@ import { redirect, useLoaderData, useLocation} from "react-router-dom";
 import AuthContext from "../../store/auth-context";
 import ThemeContext from "../../store/theme-context";
 import Table from './Table'
+import Timer from "../home/Timer";
 import classes from './Table.module.css'
 import { Fragment } from "react";
 import JoinForm from "../UI/JoinForm";
@@ -18,8 +19,9 @@ function Game(props){
     const [joinClicked, setJoinClicked] = useState(false)
     const [joined, setJoined] = useState(false)
     const [localColor, setLocalColor] = useState(null)
-    const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), players: {playerList: [null,null,null,null,null,null,], turn_stack: [], available_colors: ["blue", "red", "orange", "yellow", "green", "black"]}, deck: {}})
+    const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), status: "UNINITIALIZED", players: {playerList: [null,null,null,null,null,null,], turn_stack: [], available_colors: ["blue", "red", "orange", "yellow", "green", "black"]}, deck: {}})
     const [joinedPosition, setJoinedPosition] = useState(-1)
+    const [timerExpired, setTimerExpired] = useState(false)
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
     const location = useLocation();
@@ -94,6 +96,8 @@ function Game(props){
                 return addPlayer(prevState, action.player)
             case 'PLAYER_CHANGE/REMOVE':
                 return removePlayer(prevState, action.player)
+            case 'STATUS/SET':
+                return {...prevState, status: action.status}
             case 'DECK/SHUFFLE':
                 return
             case 'DECK/DEAL':
@@ -186,6 +190,7 @@ function Game(props){
     return (
         <Fragment>
             <div className={classes.gameBackground} id="table-background">
+                {gameState.status == "INITIALIZED" && joinedPosition == gameState.players.turn_stack[0] ? <Timer setTimerExpired={setTimerExpired} totalTime={120}/> : <></>}
                 <Table players={gameState.players.playerList} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
                 </Table>
             </div>
