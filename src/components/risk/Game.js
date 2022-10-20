@@ -62,11 +62,12 @@ function Game(props){
             socketManager.setSocket(_sock)
         }
         let gg = authctx.gameGlobals
-        if(gg.inGame || gg.sock){
+        let sock = socketManager.getSocket()
+        if(gg.inGame || sock){
             debugger
             clearTimeout(gg.awayFromGameTimer)//made it back in time, don't cancel game
-            bindSocket(gg.sock)
-            authctx.setGameGlobals({...authctx.gameGlobals, sock: gg.sock})
+            bindSocket(sock)
+            socketManager.setSocket(sock)
             restoreState()
         }else{
             establishConnection()
@@ -158,7 +159,7 @@ function Game(props){
 
     async function restoreState(){
         debugger
-        authctx.gameGlobals.sock.send(JSON.stringify({type: "GET_INITIAL_STATE", user_id: authctx.id}))
+        socketManager.send(JSON.stringify({type: "GET_INITIAL_STATE", user_id: authctx.id}))
     }
 
     const joinSubmitHandler = function(){
