@@ -8,7 +8,7 @@ import Alert from 'react-bootstrap/Alert'
 
 
 function JoinForm(props){
-    const [selectedColor, setSelectedColor] = useState("")
+    const [selectedColor, setSelectedColor] = useState(props.available_colors[0])
     //const authctx = useContext(AuthContext)
 
     const joinWithColor = ()=>{
@@ -29,12 +29,7 @@ function JoinForm(props){
                     custom="true"
                     onChange={(e)=>{setSelectedColor(e.target.value)}}
                     >
-                        <option value="blue" style={{backgroundColor: "blue"}}/>
-                        <option value="red" style={{backgroundColor: "red"}}/>
-                        <option value="yellow" style={{backgroundColor: "yellow"}}/>
-                        <option value="green" style={{backgroundColor: "green"}} />
-                        <option value="black" style={{backgroundColor: "black"}}/>
-                        <option value="orange" style={{backgroundColor: "orange"}}/>
+                        {props.available_colors.map((color)=><option key={color} value={color} style={{backgroundColor: color}}/>)}
                     </Form.Control>
                 </Modal.Body>
 

@@ -18,7 +18,7 @@ function Game(props){
     const [joinClicked, setJoinClicked] = useState(false)
     const [joined, setJoined] = useState(false)
     const [localColor, setLocalColor] = useState(null)
-    const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), players: {playerList: [null,null,null,null,null,null,], turn_stack: []}, deck: {}})
+    const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), players: {playerList: [null,null,null,null,null,null,], turn_stack: [], available_colors: ["blue", "red", "orange", "yellow", "green", "black"]}, deck: {}})
     const [joinedPosition, setJoinedPosition] = useState(-1)
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
@@ -139,16 +139,20 @@ function Game(props){
     function addPlayer(prevState, player){
         const playerList = _.cloneDeep(prevState.players.playerList)
         const turn_stack = _.cloneDeep(prevState.players.turn_stack)
+        const available_colors = _.cloneDeep(prevState.players.available_colors)
         playerList[player.table_position-1] = player
-        return {...prevState, players: {playerList: playerList, turn_stack: insertTurn(turn_stack, player.table_position)}}
+        available_colors.splice(available_colors.indexOf(player.color), 1)
+        return {...prevState, players: {playerList: playerList, turn_stack: insertTurn(turn_stack, player.table_position), available_colors: available_colors}}
     }
 
     function removePlayer(prevState, player){
         const playerList = _.cloneDeep(prevState.players.playerList)
         const turn_stack = _.cloneDeep(prevState.players.turn_stack)
+        const available_colors = _.cloneDeep(prevState.players.available_colors)
         const pos = player.table_position
         playerList[pos-1] = null
-        return {...prevState, players: {playerList: playerList, turn_stack: deleteTurn(turn_stack, pos)}}
+        available_colors.push(player.color)
+        return {...prevState, players: {playerList: playerList, turn_stack: deleteTurn(turn_stack, pos), available_colors: available_colors}}
     }
 
     function restoreCachedState(){
@@ -185,7 +189,7 @@ function Game(props){
                 <Table players={gameState.players.playerList} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
                 </Table>
             </div>
-            <JoinForm joinHandler={joinSubmitHandler}  setLocalColor={setLocalColor} closeHandler={formCloseHandler} show={authctx.isLoggedIn && joinClicked}/>
+            <JoinForm joinHandler={joinSubmitHandler} available_colors={gameState.players.available_colors} setLocalColor={setLocalColor} closeHandler={formCloseHandler} show={authctx.isLoggedIn && joinClicked}/>
         </Fragment>
     )
 }
