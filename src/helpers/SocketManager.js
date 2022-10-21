@@ -1,9 +1,9 @@
-function SocketManager(jwt){}
+function SocketManager(){}
 
 SocketManager.prototype = {
     _sock: null,
     _jwt: "",
-    _init: function(jwt){
+    setJWT: function(jwt){
         this._jwt = jwt
     },
     getSocket: function(){
@@ -13,7 +13,7 @@ SocketManager.prototype = {
         this._sock = sock
     },
     send: function(payload){
-        this._sock?.send(JSON.stringify({...payload, JWT: this._jwt}))
+        this._sock && this._sock.send(JSON.stringify({...payload, JWT: this._jwt}))
     }
 }
 

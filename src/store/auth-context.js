@@ -1,5 +1,6 @@
 import React, { useState} from 'react'
 import { useEffect } from 'react'
+import { socketManager } from '../helpers/SocketManager'
 //import { hexStringToInt8Arr } from '../helpers/helpers'
 
 const AuthContext = React.createContext({
@@ -35,6 +36,10 @@ export function AuthContextProvider(props){
             setIsLoggedIn(true)
         }
     }.bind(this), [])
+
+    useEffect(function(){
+        socketManager.setJWT(JWT)
+    }, [JWT])
 
     const logoutClickHandler = function(){
         //if in game, leave game, 

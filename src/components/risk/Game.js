@@ -1,5 +1,6 @@
 import React, { useContext, useReducer, useState, useEffect } from "react";
 import { redirect, useLoaderData, useLocation} from "react-router-dom";
+import Button from "react-bootstrap/Button";
 import AuthContext from "../../store/auth-context";
 import ThemeContext from "../../store/theme-context";
 import Table from './Table'
@@ -88,7 +89,7 @@ function Game(props){
         if(timerExpired){
             socketManager.send({type: "ACTION", user_id: authctx.id, action: {type: "NOOP"}})
         }
-    }, timerExpired)
+    }, [timerExpired])
 
     
     function stateReducer(prevState, action){
@@ -99,6 +100,7 @@ function Game(props){
             case 'RESTORE':
                 return action.state
             case 'PLAYER_CHANGE/ADD':
+                console.log('adding player');
                 return addPlayer(prevState, action.player)
             case 'PLAYER_CHANGE/REMOVE':
                 return removePlayer(prevState, action.player)
@@ -189,6 +191,10 @@ function Game(props){
         setJoinClicked(false)
     }
 
+    const startGame = function(){
+        socketManager.send({type: "START", user_id: authctx.id})
+    }
+
 
     //useEffect(()=>{}, [playerToAct])
 
@@ -196,6 +202,7 @@ function Game(props){
         <Fragment>
             <div className={classes.gameBackground} id="table-background">
                 {gameState.status == "INITIALIZED" && joinedPosition == gameState.players.turn_stack[0] ? <Timer setTimerExpired={setTimerExpired} totalTime={120}/> : <></>}
+                {gameState.status == "UNINITIALIZED" && joined ? <Button variant="success" onClick={startGame}>Start Game</Button> : <></>}
                 <Table players={gameState.players.playerList} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
                 </Table>
             </div>

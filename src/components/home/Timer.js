@@ -4,16 +4,18 @@ import Button from "react-bootstrap/Button";
 export default function Timer(props){
     //const [timer, setTimer] = useState(0)
     const [timeLeft, setTimeLeft] = useState(props.totalTime)
-
+    const [timer, setTimer] = useState(0)
     useEffect(function(){
-        setInterval(function(){
-            if(timeLeft == 1){
-                props.setTimerExpired(true)
-            }else{
-                setTimeLeft(timeLeft - 1)
-            }
-            
-        }, 1)
+        setTimer(
+            setInterval(function(){
+                if(timeLeft == 1){
+                    props.setTimerExpired(true)
+                }else{
+                    setTimeLeft(timeLeft => timeLeft - 1)
+                }
+            }.bind(this), 1000)
+        )
+        return ()=>{clearInterval(timer)}
     }, [])
 
     const timeColorMap = function(){
@@ -22,9 +24,9 @@ export default function Timer(props){
         if(ratio > 3/4){
             return "success"
         } else if(ratio > 1/2){
-            return "danger"
-        } else{
             return "warning"
+        } else{
+            return "danger"
         }
     }
 
