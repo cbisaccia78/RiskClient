@@ -107,15 +107,17 @@ function Game(props){
             case 'STATUS/SET':
                 return {...prevState, status: action.status}
             case 'DECK/SHUFFLE':
-                return
+                return prevState
             case 'DECK/DEAL':
-                return
-            case 'TURN_SWITCH':
-                return
+                return prevState
+            case 'ACTION':
+                return handleAction(prevState, action)
             case 'SOCKET/ERROR':
-                return
+                return prevState
             case 'SOCKET/CLOSE':
-                return
+                return prevState
+            case 'NOOP':
+                return prevState
             default:
                 return prevState
         }
@@ -137,6 +139,7 @@ function Game(props){
         }
 
         _sock.onmessage = function(message){
+            debugger
             const payload = JSON.parse(message.data)
             if(payload.type == "INFO/GAMEID"){
                 console.log(payload);
@@ -165,6 +168,17 @@ function Game(props){
         playerList[pos-1] = null
         available_colors.push(player.color)
         return {...prevState, players: {playerList: playerList, turn_stack: deleteTurn(turn_stack, pos), available_colors: available_colors}}
+    }
+
+    function handleAction(prevState, action){
+        
+        let s = prevState
+        //handle action 
+        //update turnstack
+        let ts = _.cloneDeep(prevState.players.turn_stack)
+        let _next = ts.shift()
+        ts.push(_next)
+        s.turn_stack = ts 
     }
 
     function restoreCachedState(){
