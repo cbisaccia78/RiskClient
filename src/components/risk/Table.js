@@ -112,7 +112,7 @@ function Table(props){
             {players.filter(val => val != null).map((player) => {
                     return (
                     <Fragment>
-                        <Player key={`player-${player.table_position}`} data={player} generatePosition={playerPosition.bind(this, player.table_position)}/>
+                        <Player key={`player-${player.table_position}`} setTimerExpired={props.setTimerExpired} totalTime={props.totalTime} data={player} generatePosition={playerPosition.bind(this, player.table_position)}/>
                         {/*<Hand key={`hand-${player.position}`} hand={player.hand} playerPos={player.position} cardPosition={cardPosition}/>*/}
                     </Fragment>)
                 })

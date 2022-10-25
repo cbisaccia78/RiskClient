@@ -4,7 +4,6 @@ import Button from "react-bootstrap/Button";
 import AuthContext from "../../store/auth-context";
 import ThemeContext from "../../store/theme-context";
 import Table from './Table'
-import Timer from "../home/Timer";
 import classes from './Table.module.css'
 import { Fragment } from "react";
 import JoinForm from "../UI/JoinForm";
@@ -111,7 +110,7 @@ function Game(props){
             case 'DECK/DEAL':
                 return prevState
             case 'ACTION':
-                return handleAction(prevState, action)
+                return handleAction(prevState, action.action)
             case 'SOCKET/ERROR':
                 return prevState
             case 'SOCKET/CLOSE':
@@ -145,7 +144,7 @@ function Game(props){
                 console.log(payload);
                 authctx.setGameGlobals({...authctx.gameGlobals, inGame: true, gameId: payload.gameId})
             }else{
-                dispatchState(payload || {type: "NoAct"})
+                dispatchState(payload || {type: "NOOP"})
             }
             
         }
@@ -173,12 +172,33 @@ function Game(props){
     function handleAction(prevState, action){
         
         let s = prevState
-        //handle action 
+        //handle action
+        switch(action.type){
+            case 'NOOP':
+            case 'TURN_CHANGE':
+                let ts = _.cloneDeep(prevState.players.turn_stack)
+                let _next = ts.shift()
+                ts.push(_next)
+                s.players.turn_stack = ts 
+                break
+            case 'ATTACK':
+                console.log();
+                break
+            case 'REINFORCE':
+                console.log();
+                break
+            case 'REDEEM_CARDS':
+                console.log();
+                break
+            case 'FORTIFY':
+                console.log();
+                break
+            default:
+                console.log('Unknown action: '+ action);
+        } 
+        return s
         //update turnstack
-        let ts = _.cloneDeep(prevState.players.turn_stack)
-        let _next = ts.shift()
-        ts.push(_next)
-        s.turn_stack = ts 
+        
     }
 
     function restoreCachedState(){
@@ -209,15 +229,22 @@ function Game(props){
         socketManager.send({type: "START", user_id: authctx.id})
     }
 
+    const noOp = function(){
+        socketManager.send({type: "ACTION", user_id: authctx.id, action: {type: "NOOP"}})
+    }
+
 
     //useEffect(()=>{}, [playerToAct])
-
+    debugger
     return (
         <Fragment>
             <div className={classes.gameBackground} id="table-background">
-                {gameState.status == "INITIALIZED" && joinedPosition == gameState.players.turn_stack[0] ? <Timer setTimerExpired={setTimerExpired} totalTime={120}/> : <></>}
+                {gameState.status == "INITIALIZED" && joinedPosition == gameState.players.turn_stack[0] ?
+                <Button onClick={noOp.bind(this)}>NOOP</Button>
+                  
+                 : <></>}
                 {gameState.status == "UNINITIALIZED" && joined ? <Button variant="success" onClick={startGame}>Start Game</Button> : <></>}
-                <Table players={gameState.players.playerList} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
+                <Table players={gameState.players.playerList} setTimerExpired={setTimerExpired} totalTime={120} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
                 </Table>
             </div>
             <JoinForm joinHandler={joinSubmitHandler} available_colors={gameState.players.available_colors} setLocalColor={setLocalColor} closeHandler={formCloseHandler} show={authctx.isLoggedIn && joinClicked}/>
