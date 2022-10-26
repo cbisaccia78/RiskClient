@@ -235,7 +235,7 @@ function Game(props){
 
 
     //useEffect(()=>{}, [playerToAct])
-    debugger
+    let ts = gameState.players.turn_stack
     return (
         <Fragment>
             <div className={classes.gameBackground} id="table-background">
@@ -244,7 +244,7 @@ function Game(props){
                   
                  : <></>}
                 {gameState.status == "UNINITIALIZED" && joined ? <Button variant="success" onClick={startGame}>Start Game</Button> : <></>}
-                <Table players={gameState.players.playerList} setTimerExpired={setTimerExpired} totalTime={120} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
+                <Table players={gameState.players.playerList} turn={ts.length ? ts[0] : null}setTimerExpired={setTimerExpired} totalTime={120} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
                 </Table>
             </div>
             <JoinForm joinHandler={joinSubmitHandler} available_colors={gameState.players.available_colors} setLocalColor={setLocalColor} closeHandler={formCloseHandler} show={authctx.isLoggedIn && joinClicked}/>

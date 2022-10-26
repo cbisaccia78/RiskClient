@@ -1,5 +1,5 @@
 import classes from './Table.module.css'
-import React, {useState, useEffect, Fragment, useContext} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import {tableGeometry, playerPartition, cardPartition} from '../../config'
 import riskboard from "../../RiskBoard.svg"
 import { isInsidePolygon, playerCoordScale } from "../../helpers/helpers"
@@ -7,6 +7,7 @@ import OpenSeat from './OpenSeat'
 import Player from './Player'
 import Hand from './Hand'
 import AuthContext from '../../store/auth-context'
+import Timer from '../UI/Timer'
 
 const determineCountry = (evt) => {
   /*const { mouseX, mouseY } = evt.getXY // need to find actual method
@@ -111,10 +112,12 @@ function Table(props){
         <div className={classes.gameTable} id="game-table" onClick = {determineCountry}>
             {players.filter(val => val != null).map((player) => {
                     return (
-                    <Fragment>
+                    <>
+                        
                         <Player key={`player-${player.table_position}`} setTimerExpired={props.setTimerExpired} totalTime={props.totalTime} data={player} generatePosition={playerPosition.bind(this, player.table_position)}/>
+                        {props.nextToAct == player.table_position ? <Timer generatePosition={playerPosition.bind(this, player.table_position)} zIndex={2} totalTime={120} setTimerExpired={props.setTimerExpired}/> : <></>}
                         {/*<Hand key={`hand-${player.position}`} hand={player.hand} playerPos={player.position} cardPosition={cardPosition}/>*/}
-                    </Fragment>)
+                    </>)
                 })
             }
             {/*!props.joined ? openSeatButtons : <></>*/}
