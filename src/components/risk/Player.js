@@ -8,7 +8,7 @@ function Player(props){
     let pos = props.generatePosition()
     let p = (
     <>
-        <button  className='player' style={{...pos, position: "absolute", backgroundImage: 'url('+data.icon+')', border: "5px solid rgb(0, 0, 0)"}}>
+        <button  className={`player ${props.extraClasses}`} style={{...pos, position: "absolute", backgroundImage: 'url('+data.icon+')', border: "5px solid rgb(0, 0, 0)"}}>
             {/*<img src={data.icon} alt={data.name} style={{position: "relative", width: "inherit", height: "inherit", borderRadius: "50%", border: "5px solid rgb(0, 0, 0)" }}/>*/}
         </button>
         <h1>{data.name}</h1>

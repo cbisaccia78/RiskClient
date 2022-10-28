@@ -5,8 +5,10 @@ import React, { useContext } from 'react'
 function OpenSeat(props){
 
     const joinWithPosition = function(){
-        props.joinClickHandler()
-        props.setJoinedPosition(props.position)
+        if(!props.joined){
+            props.joinClickHandler()
+            props.setJoinedPosition(props.position)
+        }
     }
     return (
     //createPortal(

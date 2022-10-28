@@ -22,6 +22,7 @@ const determineCountry = (evt) => {
 
 function Table(props){
     //const authctx = useContext(AuthContext)
+    debugger
     let players = props.players
     //console.log(players);
     const [VPR, setVPR] = useState(calculateVPR())
@@ -104,18 +105,19 @@ function Table(props){
     //console.log(num_players);
     for(var i = 0; i < 6; i++){
         if(players[i] == null){
-            openSeatButtons.push(<OpenSeat key={`open-${i}`} setJoinedPosition={props.setJoinedPosition} joinClickHandler={props.joinClickHandler} position={i+1} generatePosition={playerPosition.bind(this, i+1)}/>)
+            openSeatButtons.push(<OpenSeat key={`open-${i}`} joined={props.joined} setJoinedPosition={props.setJoinedPosition} joinClickHandler={props.joinClickHandler} position={i+1} generatePosition={playerPosition.bind(this, i+1)}/>)
         }
     }
 
     return (
         <div className={classes.gameTable} id="game-table" onClick = {determineCountry}>
             {players.filter(val => val != null).map((player) => {
+                    let modified = props.turn == player.table_position && props.started
                     return (
                     <>
                         
-                        <Player key={`player-${player.table_position}`} setTimerExpired={props.setTimerExpired} totalTime={props.totalTime} data={player} generatePosition={playerPosition.bind(this, player.table_position)}/>
-                        {props.nextToAct == player.table_position ? <Timer generatePosition={playerPosition.bind(this, player.table_position)} zIndex={2} totalTime={120} setTimerExpired={props.setTimerExpired}/> : <></>}
+                        <Player key={`player-${player.table_position}`} extraClasses={modified ? "covered" : ""} setTimerExpired={props.setTimerExpired} totalTime={props.totalTime} data={player} generatePosition={playerPosition.bind(this, player.table_position)}/>
+                        {modified ? <Timer key={`timer-${props.turn}`} position={player.table_position} generatePosition={playerPosition.bind(this, player.table_position)} totalTime={120} setTimerExpired={props.setTimerExpired}/> : <></>}
                         {/*<Hand key={`hand-${player.position}`} hand={player.hand} playerPos={player.position} cardPosition={cardPosition}/>*/}
                     </>)
                 })

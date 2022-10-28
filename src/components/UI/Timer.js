@@ -25,15 +25,17 @@ export default function Timer(props){
         //green yellow red blinking red
         const ratio = timeLeft/props.totalTime
         if(ratio > 1/2){
-            return "success"
+            return "green"
         } else if(ratio > 1/4){
-            return "warning"
+            return "yellow"
         } else{
-            return "danger"
+            return "red"
         }
     }
 
     return (
-        <Button className="spinTimer" style={{...props.generatePosition(), border:`5px solid ${timeColorMap()}`, zIndex: props.zIndex}} variant={timeColorMap()}></Button>
+        <Button key={`button-${props.table_position}`} className="spinTimer" style={{...props.generatePosition()/*, borderTop:`5px solid ${timeColorMap()}`*/}} variant={timeColorMap()}>
+            {`${timeLeft} s`}
+        </Button>
     )
 }

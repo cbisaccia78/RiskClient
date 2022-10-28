@@ -85,7 +85,9 @@ function Game(props){
     }.bind(this), [])
 
     useEffect(function(){
-        if(timerExpired){
+        let ts = gameState.players.turn_stack
+        let turn = ts.length ? ts[0] : 0
+        if(timerExpired && turn == joinedPosition){
             socketManager.send({type: "ACTION", user_id: authctx.id, action: {type: "NOOP"}})
         }
     }, [timerExpired])
@@ -103,6 +105,12 @@ function Game(props){
                 return addPlayer(prevState, action.player)
             case 'PLAYER_CHANGE/REMOVE':
                 return removePlayer(prevState, action.player)
+            case 'PLAYER_CHANGE/INITIALIZE':
+                const playerList = _.cloneDeep(gameState.players.playerList)
+                const numInfantry = 40 - (action.table_size - 2)*5
+                const player = {...action.player, army: {INFANTRY: numInfantry, CAVALRY: 0, ARTILLERY: 0}}
+                playerList[player.table_position-1] = player
+                return {...prevState, players: {...gameState.players, playerList: playerList}}
             case 'STATUS/SET':
                 return {...prevState, status: action.status}
             case 'DECK/SHUFFLE':
@@ -143,6 +151,10 @@ function Game(props){
             if(payload.type == "INFO/GAMEID"){
                 console.log(payload);
                 authctx.setGameGlobals({...authctx.gameGlobals, inGame: true, gameId: payload.gameId})
+            }else if(payload.type == "INITIALIZE_PLAYERS"){
+                gameState.players.playerList.forEach(function(player){
+                    dispatchState({type: "PLAYER_CHANGE/INITIALIZE", player: player})
+                }.bind(this))
             }else{
                 dispatchState(payload || {type: "NOOP"})
             }
@@ -173,6 +185,7 @@ function Game(props){
         
         let s = prevState
         //handle action
+        console.log(action);
         switch(action.type){
             case 'NOOP':
             case 'TURN_CHANGE':
@@ -180,7 +193,7 @@ function Game(props){
                 let _next = ts.shift()
                 ts.push(_next)
                 s.players.turn_stack = ts 
-                break
+                return {...s, players: {...s.players, turn_stack: ts}}
             case 'ATTACK':
                 console.log();
                 break
@@ -217,8 +230,8 @@ function Game(props){
     }
 
     const joinClickHandler = function(){
-        console.log('clicked');
         setJoinClicked(true)
+        return joined
     }
 
     const formCloseHandler = function(){
@@ -236,15 +249,17 @@ function Game(props){
 
     //useEffect(()=>{}, [playerToAct])
     let ts = gameState.players.turn_stack
+    let turn = ts.length ? ts[0] : 0
+    debugger
     return (
         <Fragment>
             <div className={classes.gameBackground} id="table-background">
-                {gameState.status == "INITIALIZED" && joinedPosition == gameState.players.turn_stack[0] ?
+                {gameState.status == "INITIALIZED" && joinedPosition == turn ?
                 <Button onClick={noOp.bind(this)}>NOOP</Button>
                   
                  : <></>}
                 {gameState.status == "UNINITIALIZED" && joined ? <Button variant="success" onClick={startGame}>Start Game</Button> : <></>}
-                <Table players={gameState.players.playerList} turn={ts.length ? ts[0] : null}setTimerExpired={setTimerExpired} totalTime={120} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
+                <Table key={`table-turn-${turn}`} players={gameState.players.playerList} started={gameState.status == "INITIALIZED"} turn={turn} setTimerExpired={setTimerExpired} totalTime={120} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
                 </Table>
             </div>
             <JoinForm joinHandler={joinSubmitHandler} available_colors={gameState.players.available_colors} setLocalColor={setLocalColor} closeHandler={formCloseHandler} show={authctx.isLoggedIn && joinClicked}/>
