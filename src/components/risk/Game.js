@@ -97,6 +97,7 @@ function Game(props){
         switch(action.type){
             case 'INITIALIZE_GAME':
                 //console.log(action.state)
+                debugger
                 return {...prevState, ...(action.state)}
             case 'RESTORE':
                 return action.state
@@ -105,12 +106,15 @@ function Game(props){
                 return addPlayer(prevState, action.player)
             case 'PLAYER_CHANGE/REMOVE':
                 return removePlayer(prevState, action.player)
-            case 'PLAYER_CHANGE/INITIALIZE':
-                const playerList = _.cloneDeep(gameState.players.playerList)
-                const numInfantry = 40 - (action.table_size - 2)*5
-                const player = {...action.player, army: {INFANTRY: numInfantry, CAVALRY: 0, ARTILLERY: 0}}
-                playerList[player.table_position-1] = player
-                return {...prevState, players: {...gameState.players, playerList: playerList}}
+            case 'PLAYER_CHANGE/INITIALIZE_ALL':
+                const playerList = _.cloneDeep(prevState.players.playerList)
+                playerList.filter(player=>player != null).forEach(function(player){
+                    const numInfantry = 40 - (prevState.players.turn_stack.length - 2)*5
+                    const _player = {...player, army: {INFANTRY: numInfantry, CAVALRY: 0, ARTILLERY: 0}}
+                    playerList[player.table_position-1] = _player
+                })
+                
+                return {...prevState, players: {...prevState.players, playerList: playerList}}
             case 'STATUS/SET':
                 return {...prevState, status: action.status}
             case 'DECK/SHUFFLE':
@@ -141,7 +145,7 @@ function Game(props){
         }
         _sock.onclose = function(ev){
             dispatchState({type: "SOCKET_CLOSE"})
-            _sock.send(JSON.stringify({user_id: authctx.id, table_position: joinedPosition}))
+            _sock.send(JSON.stringify({user_id: authctx.id, player: {table_position: joinedPosition, color: localColor}}))
             alert("closed with event: " + ev.reason)
         }
 
@@ -151,10 +155,6 @@ function Game(props){
             if(payload.type == "INFO/GAMEID"){
                 console.log(payload);
                 authctx.setGameGlobals({...authctx.gameGlobals, inGame: true, gameId: payload.gameId})
-            }else if(payload.type == "INITIALIZE_PLAYERS"){
-                gameState.players.playerList.forEach(function(player){
-                    dispatchState({type: "PLAYER_CHANGE/INITIALIZE", player: player})
-                }.bind(this))
             }else{
                 dispatchState(payload || {type: "NOOP"})
             }
@@ -250,7 +250,6 @@ function Game(props){
     //useEffect(()=>{}, [playerToAct])
     let ts = gameState.players.turn_stack
     let turn = ts.length ? ts[0] : 0
-    debugger
     return (
         <Fragment>
             <div className={classes.gameBackground} id="table-background">

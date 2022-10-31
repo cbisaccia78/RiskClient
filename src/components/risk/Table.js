@@ -22,7 +22,6 @@ const determineCountry = (evt) => {
 
 function Table(props){
     //const authctx = useContext(AuthContext)
-    debugger
     let players = props.players
     //console.log(players);
     const [VPR, setVPR] = useState(calculateVPR())
