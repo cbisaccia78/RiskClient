@@ -2,7 +2,7 @@ import classes from './Table.module.css'
 import React, {useState, useEffect, useContext} from 'react'
 import {tableGeometry, playerPartition, cardPartition} from '../../config'
 import riskboard from "../../RiskBoard.svg"
-import { isInsidePolygon, playerCoordScale } from "../../helpers/helpers"
+import { playerCoordScale } from "../../helpers/helpers"
 import OpenSeat from './OpenSeat'
 import Player from './Player'
 import Hand from './Hand'

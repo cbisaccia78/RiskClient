@@ -1,6 +1,6 @@
 import React, { useContext, useReducer, useState, useEffect } from "react";
 import { redirect, useLoaderData, useLocation} from "react-router-dom";
-import { pathDToPoly } from "../../helpers/helpers";
+import { pathDToPoly, isInsidePolygon} from "../../helpers/helpers";
 import Button from "react-bootstrap/Button";
 import AuthContext from "../../store/auth-context";
 import ThemeContext from "../../store/theme-context";
@@ -40,25 +40,38 @@ function Game(props){
     }.bind(this), [joined])
 
     useEffect(function(){
-        const resizeHandler = function(event){
-            setTerritoryBoundaries([window.visualViewport.width, window.visualViewport.height])
+        const resizeHandler = function(){
+            const detected = async function(event, handler){
+                let mouseX = event.clientX, mouseY = event.clientY
+                territoryBoundaries.forEach(function(value, key){
+                    if(isInsidePolygon(value, mouseX, mouseY)){
+                        document.getElementById
+                    }
+                })
+            }
+            const clickDetected = async function(event){
+                detected(event, clickHandler)
+            }
+
+            const moveDetected = async function(event){
+                detected(event, moveHandler)
+            }
+
+            const clickHandler = async function(){}
+            const moveHandler = async function(){}
+            
+            window.addEventListener('click', clickDetected)
+            window.addEventListener('mousemove', moveDetected)
+            
         }
-        window.addEventListener('resize', resizeHandler.bind(this))
+        window.addEventListener('resize', calculateTerritoryBoundaries.bind(this))
 
         return _ => {
             window.removeEventListener('resize', resizeHandler)
+            window.removeEventListener('click', clickDetected)
+            window.removeEventListener('mousemove', moveDetected)
         }
-    }, [])
-
-    useEffect(function(){
-        const clickHandler = async function(event){
-
-        }
-        window.addEventListener('click', clickHandler.bind(this))
-        return _ => {
-            window.removeEventListener('click', clickHandler)
-        }
-    }, [dimensions])
+    }.bind(this), [])
 
     useEffect(function(){
         const establishConnection = async function(){
@@ -125,7 +138,6 @@ function Game(props){
         setTerritoryBoundaries(idBoundaryMap)
 
     }
-
     
     function stateReducer(prevState, action){
         switch(action.type){
