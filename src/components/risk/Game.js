@@ -19,7 +19,7 @@ function Game(props){
     
     const [joinClicked, setJoinClicked] = useState(false)
     const [joined, setJoined] = useState(false)
-    const [dimensions, setDimensions] = useState([window.visualViewport.width, window.visualViewport.height])
+    const [territoryBoundaries, setTerritoryBoundaries] = useState(calculateTerritoryBoundaries())
     const [localColor, setLocalColor] = useState(null)
     const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), status: "UNINITIALIZED", players: {playerList: [null,null,null,null,null,null,], turn_stack: [], available_colors: ["blue", "red", "orange", "yellow", "green", "black"]}, deck: {}})
     const [joinedPosition, setJoinedPosition] = useState(-1)
@@ -41,7 +41,7 @@ function Game(props){
 
     useEffect(function(){
         const resizeHandler = function(event){
-            setDimensions([window.visualViewport.width, window.visualViewport.height])
+            setTerritoryBoundaries([window.visualViewport.width, window.visualViewport.height])
         }
         window.addEventListener('resize', resizeHandler.bind(this))
 
@@ -51,7 +51,13 @@ function Game(props){
     }, [])
 
     useEffect(function(){
+        const clickHandler = async function(event){
 
+        }
+        window.addEventListener('click', clickHandler.bind(this))
+        return _ => {
+            window.removeEventListener('click', clickHandler)
+        }
     }, [dimensions])
 
     useEffect(function(){
@@ -108,6 +114,17 @@ function Game(props){
             socketManager.send({type: "ACTION", user_id: authctx.id, action: {type: "NOOP"}})
         }
     }, [timerExpired])
+
+    async function calculateTerritoryBoundaries(){
+        let territories = document.getElementById("layer4").children
+        let idBoundaryMap = new Map()
+        territories.forEach(function(territory){
+            idBoundaryMap.set(territory.id, pathDToPoly(territory.attributes.d))
+        })
+        console.log(idBoundaryMap)
+        setTerritoryBoundaries(idBoundaryMap)
+
+    }
 
     
     function stateReducer(prevState, action){
