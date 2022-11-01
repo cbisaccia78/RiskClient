@@ -28,41 +28,72 @@ export const randInt = function(start, end){
     return start + Math.floor(Math.random()*(end - start))
 }
 
+export const linearApproxBezier = function(numPoints=2, p_0, p_1, p_2){
+    /*
+        parametrize linear interpolants from p0->p1 and p1->p2 between 0-1
+        step size is equal to 1/numPoints
+        let polygon = []
+        for each step i do
+            let L01i
+            let L12i
+            parametrize line from L01i to L12i (call this Lstep) between 0-1
+            polygon.push(Lstep(i))
+    */
+   let approximation = []
+   for(var i = 0; i <= 1; i += 1/numPoints){
+        let lStepXi = (1-i)*((1-i)*p_0.x + i*p_1.x) + i*((1-i)*p_1.x+i*p_2.x)
+        let lStepYi = (1-i)*((1-i)*p_0.y + i*p_1.y) + i*((1-i)*p_1.y+i*p_2.y)
+        approximation.push({x: lStepXi, y: lStepYi})
+   }
+}
+
 export const pathDToPoly = function(d){
-    //does not support curve commands yet
+    //only handles absolute commands for now. 
     let polygon = []
-    let full = d.split(" ")
+    let full = d.attributes.split(" ")
     var prevCommand = ""
-    full.forEach(function(ele){
+    var paramNum = 1
+    var threePoints = []
+    var command = false
+    //var twoPoints
+    for(var i = 0; i < full.length; i++){
+        let ele = full[i]
         if(!command){
-            let params = ele.split(",")
             switch(prevCommand){
-                case "M":
-                    break
-                case "m": 
-                    break
                 case "L":
+                case "M":
+                    params = ele.split(",")
+                    polygon.push({x: parseInt(params[0]), y: parseInt(params[1])})
                     break
-                case "l":
+                case "C":
+                    if(paramNum < 4){
+                        params = ele.split(",")
+                        threePoints.push({x: parseInt(params[0]), y: parseInt(params[1])})
+                    }else{
+                        polygon.concat(linearApproxBezier(numPoints=5, threePoints[0], threePoints[1], threePoints[2]))
+                        paramNum = 1
+                        threePoints = []
+                        command = true
+                    }
                     break
-                case "H":
-                    break
-                case "h":
-                    break
-                case "V":
-                    break
-                case "v":
-                    break
+                case "c":
                 case "Z":
                 case "z":
+                case "m": 
+                case "l":
+                case "H":
+                case "h":
+                case "V":
+                case "v":
+                default:
                     break
             }
         }else{
             prevCommand = ele
+            command = false
         }
-        command = !command
-    })
-    return
+    }
+    return polygon
 }
 
 export const isInsidePolygon = function(polygon, mouseX, mouseY) {    
