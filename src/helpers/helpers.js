@@ -28,6 +28,43 @@ export const randInt = function(start, end){
     return start + Math.floor(Math.random()*(end - start))
 }
 
+export const pathDToPoly = function(d){
+    //does not support curve commands yet
+    let polygon = []
+    let full = d.split(" ")
+    var prevCommand = ""
+    full.forEach(function(ele){
+        if(!command){
+            let params = ele.split(",")
+            switch(prevCommand){
+                case "M":
+                    break
+                case "m": 
+                    break
+                case "L":
+                    break
+                case "l":
+                    break
+                case "H":
+                    break
+                case "h":
+                    break
+                case "V":
+                    break
+                case "v":
+                    break
+                case "Z":
+                case "z":
+                    break
+            }
+        }else{
+            prevCommand = ele
+        }
+        command = !command
+    })
+    return
+}
+
 export const isInsidePolygon = function(polygon, mouseX, mouseY) {    
     const c = false;
     
