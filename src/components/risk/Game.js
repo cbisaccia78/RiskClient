@@ -1,5 +1,6 @@
 import React, { useContext, useReducer, useState, useEffect } from "react";
 import { redirect, useLoaderData, useLocation} from "react-router-dom";
+import { pathDToPoly } from "../../helpers/helpers";
 import Button from "react-bootstrap/Button";
 import AuthContext from "../../store/auth-context";
 import ThemeContext from "../../store/theme-context";
@@ -18,6 +19,7 @@ function Game(props){
     
     const [joinClicked, setJoinClicked] = useState(false)
     const [joined, setJoined] = useState(false)
+    const [dimensions, setDimensions] = useState([window.visualViewport.width, window.visualViewport.height])
     const [localColor, setLocalColor] = useState(null)
     const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), status: "UNINITIALIZED", players: {playerList: [null,null,null,null,null,null,], turn_stack: [], available_colors: ["blue", "red", "orange", "yellow", "green", "black"]}, deck: {}})
     const [joinedPosition, setJoinedPosition] = useState(-1)
@@ -36,6 +38,21 @@ function Game(props){
         establishConnection()
         
     }.bind(this), [joined])
+
+    useEffect(function(){
+        const resizeHandler = function(event){
+            setDimensions([window.visualViewport.width, window.visualViewport.height])
+        }
+        window.addEventListener('resize', resizeHandler.bind(this))
+
+        return _ => {
+            window.removeEventListener('resize', resizeHandler)
+        }
+    }, [])
+
+    useEffect(function(){
+
+    }, [dimensions])
 
     useEffect(function(){
         const establishConnection = async function(){

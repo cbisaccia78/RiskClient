@@ -49,6 +49,7 @@ export const linearApproxBezier = function(numPoints=2, p_0, p_1, p_2){
 
 export const pathDToPoly = function(d){
     //only handles absolute commands for now. 
+    debugger
     let polygon = []
     let full = d.attributes.split(" ")
     var prevCommand = ""
