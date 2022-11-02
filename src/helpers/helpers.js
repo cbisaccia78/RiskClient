@@ -45,17 +45,18 @@ export const linearApproxBezier = function(numPoints=2, p_0, p_1, p_2){
         let lStepYi = (1-i)*((1-i)*p_0.y + i*p_1.y) + i*((1-i)*p_1.y+i*p_2.y)
         approximation.push({x: lStepXi, y: lStepYi})
    }
+   return approximation
 }
 
 export const pathDToPoly = function(d){
     //only handles absolute commands for now. 
-    debugger
-    let polygon = []
-    let full = d.attributes.split(" ")
+    var polygon = []
+    let full = d.split(" ")
     var prevCommand = ""
     var paramNum = 1
     var threePoints = []
-    var command = false
+    var command = true
+    var params = []
     //var twoPoints
     for(var i = 0; i < full.length; i++){
         let ele = full[i]
@@ -65,17 +66,19 @@ export const pathDToPoly = function(d){
                 case "M":
                     params = ele.split(",")
                     polygon.push({x: parseInt(params[0]), y: parseInt(params[1])})
+                    command=true
                     break
                 case "C":
-                    if(paramNum < 4){
+                    
                         params = ele.split(",")
                         threePoints.push({x: parseInt(params[0]), y: parseInt(params[1])})
-                    }else{
-                        polygon.concat(linearApproxBezier(numPoints=5, threePoints[0], threePoints[1], threePoints[2]))
-                        paramNum = 1
-                        threePoints = []
-                        command = true
-                    }
+                        paramNum++
+                        if(paramNum == 4){
+                            polygon = polygon.concat(linearApproxBezier(5, threePoints[0], threePoints[1], threePoints[2]))
+                            paramNum = 1
+                            threePoints = []
+                            command = true
+                        }
                     break
                 case "c":
                 case "Z":

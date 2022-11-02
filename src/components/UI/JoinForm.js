@@ -15,7 +15,6 @@ function JoinForm(props){
         props.setLocalColor(selectedColor || props.available_colors[0])
         props.joinHandler()
     }
-    debugger
     return (
         <Modal show={props.show} onHide={props.closeHandler}>
             <Modal.Dialog>

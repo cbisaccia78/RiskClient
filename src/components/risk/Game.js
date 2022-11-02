@@ -1,4 +1,4 @@
-import React, { useContext, useReducer, useState, useEffect } from "react";
+import React, { useContext, useReducer, useState, useEffect, useRef } from "react";
 import { redirect, useLoaderData, useLocation} from "react-router-dom";
 import { pathDToPoly, isInsidePolygon} from "../../helpers/helpers";
 import Button from "react-bootstrap/Button";
@@ -11,6 +11,7 @@ import JoinForm from "../UI/JoinForm";
 import {insertTurn, deleteTurn} from '../../helpers/helpers'
 import {socketManager} from "../../helpers/SocketManager";
 import _ from "lodash"
+import { isDOMComponent } from "react-dom/test-utils";
 
 
 
@@ -19,7 +20,7 @@ function Game(props){
     
     const [joinClicked, setJoinClicked] = useState(false)
     const [joined, setJoined] = useState(false)
-    const [territoryBoundaries, setTerritoryBoundaries] = useState(calculateTerritoryBoundaries())
+    const [territoryBoundaries, setTerritoryBoundaries] = useState(null)
     const [localColor, setLocalColor] = useState(null)
     const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), status: "UNINITIALIZED", players: {playerList: [null,null,null,null,null,null,], turn_stack: [], available_colors: ["blue", "red", "orange", "yellow", "green", "black"]}, deck: {}})
     const [joinedPosition, setJoinedPosition] = useState(-1)
@@ -27,6 +28,7 @@ function Game(props){
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
     const location = useLocation();
+    const tableRef = useRef(null)
 
     useEffect(function(){
         const establishConnection = async function(){
@@ -40,36 +42,46 @@ function Game(props){
     }.bind(this), [joined])
 
     useEffect(function(){
-        const resizeHandler = function(){
-            const detected = async function(event, handler){
-                let mouseX = event.clientX, mouseY = event.clientY
-                territoryBoundaries.forEach(function(value, key){
-                    if(isInsidePolygon(value, mouseX, mouseY)){
-                        document.getElementById
-                    }
-                })
-            }
-            const clickDetected = async function(event){
-                detected(event, clickHandler)
-            }
-
-            const moveDetected = async function(event){
-                detected(event, moveHandler)
-            }
-
-            const clickHandler = async function(){}
-            const moveHandler = async function(){}
-            
-            window.addEventListener('click', clickDetected)
-            window.addEventListener('mousemove', moveDetected)
-            
+        const detected = async function(event, handler){
+            let mouseX = event.clientX, mouseY = event.clientY
+            debugger
+            territoryBoundaries.forEach(function(value, key){
+                if(isInsidePolygon(value, mouseX, mouseY)){
+                    handler(key)
+                }
+            })
         }
-        window.addEventListener('resize', calculateTerritoryBoundaries.bind(this))
+        const clickDetected = async function(event){
+            detected(event, clickHandler)
+        }
+
+        const moveDetected = async function(event){
+            detected(event, moveHandler)
+        }
+
+        const clickHandler = async function(key){
+            document.getElementById(key).className += " hovered"
+        }
+        const moveHandler = async function(){
+
+        }
+        
+        window.addEventListener('click', clickDetected)
+        //window.addEventListener('mousemove', moveDetected)
+        return _ => {
+            window.removeEventListener('click', clickDetected)
+            //window.removeEventListener('mousemove', moveDetected)
+        }
+    }, [territoryBoundaries])
+
+    useEffect(function(){
+        const resizeHandler = function(){
+            calculateTerritoryBoundaries()
+        }
+        window.addEventListener('resize', resizeHandler.bind(this))
 
         return _ => {
             window.removeEventListener('resize', resizeHandler)
-            window.removeEventListener('click', clickDetected)
-            window.removeEventListener('mousemove', moveDetected)
         }
     }.bind(this), [])
 
@@ -95,14 +107,12 @@ function Game(props){
             }
             if(authctx.id > 0) ws_protos.push(authctx.JWT)
             const _sock = new WebSocket(`ws://localhost:3001/gamesession/${gid}/${authctx.id}`, ws_protos)// hardcoded gameid and userid, need to get dynamically
-            debugger
             bindSocket(_sock);
             socketManager.setSocket(_sock)
         }
         let gg = authctx.gameGlobals
         let sock = socketManager.getSocket()
         if(gg.inGame || sock){
-            debugger
             clearTimeout(gg.awayFromGameTimer)//made it back in time, don't cancel game
             bindSocket(sock)
             socketManager.setSocket(sock)
@@ -129,21 +139,21 @@ function Game(props){
     }, [timerExpired])
 
     async function calculateTerritoryBoundaries(){
-        let territories = document.getElementById("layer4").children
+        debugger
+        let territories = tableRef.current.children['gameSVG'].contentWindow.document.getElementById('layer4').children
         let idBoundaryMap = new Map()
-        territories.forEach(function(territory){
-            idBoundaryMap.set(territory.id, pathDToPoly(territory.attributes.d))
-        })
-        console.log(idBoundaryMap)
+        for(var i = 0; i < territories.length; i++){
+            let territory = territories[i]
+            idBoundaryMap.set(territory.id, pathDToPoly(territory.attributes.d.value))
+        }
+        //console.log(idBoundaryMap)
         setTerritoryBoundaries(idBoundaryMap)
-
     }
     
     function stateReducer(prevState, action){
         switch(action.type){
             case 'INITIALIZE_GAME':
                 //console.log(action.state)
-                debugger
                 return {...prevState, ...(action.state)}
             case 'RESTORE':
                 return action.state
@@ -196,7 +206,6 @@ function Game(props){
         }
 
         _sock.onmessage = function(message){
-            debugger
             const payload = JSON.parse(message.data)
             if(payload.type == "INFO/GAMEID"){
                 console.log(payload);
@@ -280,6 +289,10 @@ function Game(props){
         return joined
     }
 
+    const boardClickHandler = function(){
+
+    }
+
     const formCloseHandler = function(){
         setJoinClicked(false)
     }
@@ -304,7 +317,7 @@ function Game(props){
                   
                  : <></>}
                 {gameState.status == "UNINITIALIZED" && joined ? <Button variant="success" onClick={startGame}>Start Game</Button> : <></>}
-                <Table key={`table-turn-${turn}`} players={gameState.players.playerList} started={gameState.status == "INITIALIZED"} turn={turn} setTimerExpired={setTimerExpired} totalTime={120} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
+                <Table key={`table-turn-${turn}`} onBoardClick={boardClickHandler} tableRef={tableRef} calculateTerritoryBoundaries={calculateTerritoryBoundaries} players={gameState.players.playerList} started={gameState.status == "INITIALIZED"} turn={turn} setTimerExpired={setTimerExpired} totalTime={120} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
                 </Table>
             </div>
             <JoinForm joinHandler={joinSubmitHandler} available_colors={gameState.players.available_colors} setLocalColor={setLocalColor} closeHandler={formCloseHandler} show={authctx.isLoggedIn && joinClicked}/>

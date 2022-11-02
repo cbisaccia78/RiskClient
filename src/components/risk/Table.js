@@ -39,13 +39,16 @@ function Table(props){
     }, [VPR])
 
     useEffect(()=>{
-        let img = document.createElement("img")
-        img.src = riskboard
-        img.className = "gameSVG"
-        img.id = "gameSVG"
-        img.style = "height: 100%; width: 100%;"
+
+        let obj = document.createElement("object")
+        obj.data = riskboard
+        obj.type = "image/svg+xml"
+        obj.className = "gameSVG"
+        obj.id = "gameSVG"
+        obj.style = "height: 100%; width: 100%;"
         const t = document.getElementById("game-table")
-        t.appendChild(img)
+        t.appendChild(obj)
+        setTimeout(props.calculateTerritoryBoundaries.bind(this), 100)
       }, [])
 
     function calculateVPR(){
@@ -109,7 +112,7 @@ function Table(props){
     }
 
     return (
-        <div className={classes.gameTable} id="game-table" onClick = {determineCountry}>
+        <div ref={props.tableRef} className={classes.gameTable} id="game-table" onClick = {determineCountry}>
             {players.filter(val => val != null).map((player) => {
                     let modified = props.turn == player.table_position && props.started
                     return (
