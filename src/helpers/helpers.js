@@ -97,6 +97,7 @@ export const pathDToPoly = function(d){
             command = false
         }
     }
+    polygon.push(polygon[0])
     return polygon
 }
 

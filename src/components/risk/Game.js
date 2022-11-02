@@ -46,7 +46,7 @@ function Game(props){
             return
         }
         const detected = async function(event, handler){
-            let mouseX = event.clientX, mouseY = event.clientY
+            let mouseX = tableRef.current.offsetLeft + event.clientX, mouseY = tableRef.current.offsetTop + event.clientY
             //debugger
             territoryBoundaries.forEach(function(value, key){
                 if(isInsidePolygon(value, mouseX, mouseY)){
