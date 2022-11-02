@@ -12,6 +12,7 @@ import {insertTurn, deleteTurn} from '../../helpers/helpers'
 import {socketManager} from "../../helpers/SocketManager";
 import _ from "lodash"
 import { isDOMComponent } from "react-dom/test-utils";
+import Territory from "../test/Territory";
 
 
 
@@ -328,6 +329,7 @@ function Game(props){
                 </Table>
             </div>
             <JoinForm joinHandler={joinSubmitHandler} available_colors={gameState.players.available_colors} setLocalColor={setLocalColor} closeHandler={formCloseHandler} show={authctx.isLoggedIn && joinClicked}/>
+            {territoryBoundaries ? <Territory polygon={territoryBoundaries.values().next().value}/> : <></>}
         </Fragment>
     )
 }

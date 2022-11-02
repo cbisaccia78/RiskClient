@@ -102,6 +102,7 @@ export const pathDToPoly = function(d){
 }
 
 export const isInsidePolygon = function(polygon, mouseX, mouseY) {    
+    /*
     var c = false;
     
     for (let i=1, j=0; i < polygon.length; i++, j++) {
@@ -118,7 +119,30 @@ export const isInsidePolygon = function(polygon, mouseX, mouseY) {
                 c = !c;
         }            
     }
-    return c;
+    return c;*/
+    /*
+        Edge Crossing Rules
+         1.   an upward edge includes its starting endpoint, and excludes its final endpoint;
+            
+         2.   a downward edge excludes its starting endpoint, and includes its final endpoint;
+            
+         3.   horizontal edges are excluded
+            
+         4.   the edge-ray intersection point must be strictly right of the point P.
+    */
+    var cn = 0
+    for (let i=0; i < polygon.length - 1; i++) {
+        //if edge i crosses upward (rule 1) OR edge i crosses downward (rule 2)
+        let vI = polygon[i]
+        let vJ = polygon[i+1]
+        if(((vI.y <= mouseY) && (vJ.y > mouseY)) || ((vI.y > mouseY) && (vJ.y <= mouseY))){
+            let vt = (mouseY - vI.y) / (vJ.y - vI.y)
+            if(mouseX < vI.x + vt*(vJ.x - vI.x)){
+                cn++
+            }
+        } 
+    }
+    return cn&1
 }
 
 export const bufferToBase64 = function( buffer ) {

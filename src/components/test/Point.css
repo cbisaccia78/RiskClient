@@ -1,0 +1,8 @@
+.Point{
+    background-color:blueviolet;
+    border-radius:50%;
+    width: 0.01vh;
+    height: 0.01vh;
+    position: relative;
+    z-index: 1000;
+}
