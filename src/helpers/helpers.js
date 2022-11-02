@@ -101,7 +101,7 @@ export const pathDToPoly = function(d){
 }
 
 export const isInsidePolygon = function(polygon, mouseX, mouseY) {    
-    const c = false;
+    var c = false;
     
     for (let i=1, j=0; i < polygon.length; i++, j++) {
         const ix = polygon[i].x;

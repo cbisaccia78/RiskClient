@@ -42,16 +42,21 @@ function Game(props){
     }.bind(this), [joined])
 
     useEffect(function(){
+        if(!tableRef){
+            return
+        }
         const detected = async function(event, handler){
             let mouseX = event.clientX, mouseY = event.clientY
-            debugger
+            //debugger
             territoryBoundaries.forEach(function(value, key){
                 if(isInsidePolygon(value, mouseX, mouseY)){
+                    debugger
                     handler(key)
                 }
             })
         }
         const clickDetected = async function(event){
+            console.log('click');
             detected(event, clickHandler)
         }
 
@@ -60,16 +65,18 @@ function Game(props){
         }
 
         const clickHandler = async function(key){
-            document.getElementById(key).className += " hovered"
+            console.log(key)
+            let _class = tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).getAttribute('class')
+            tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).setAttribute('class', _class + " hovered")
         }
         const moveHandler = async function(){
 
         }
         
-        window.addEventListener('click', clickDetected)
+        tableRef.current.children['gameSVG'].contentWindow.addEventListener('click', clickDetected)
         //window.addEventListener('mousemove', moveDetected)
         return _ => {
-            window.removeEventListener('click', clickDetected)
+            tableRef.current.children['gameSVG'].contentWindow.removeEventListener('click', clickDetected)
             //window.removeEventListener('mousemove', moveDetected)
         }
     }, [territoryBoundaries])

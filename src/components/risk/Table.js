@@ -51,6 +51,8 @@ function Table(props){
         setTimeout(props.calculateTerritoryBoundaries.bind(this), 100)
       }, [])
 
+      
+
     function calculateVPR(){
         //this needs to ensure that 1.4447761194029851 ratio does not break
         /*
