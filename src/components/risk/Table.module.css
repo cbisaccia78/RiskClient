@@ -24,6 +24,6 @@
 }
 
 .gameSVG {
-    width: inherit;
-    height: inherit;
+    top: 0%;
+    position: relative;
 }

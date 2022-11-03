@@ -47,17 +47,17 @@ function Game(props){
             return
         }
         const detected = async function(event, handler){
-            let mouseX = tableRef.current.offsetLeft + event.clientX, mouseY = tableRef.current.offsetTop + event.clientY
+            let bb = tableRef.current.getBoundingClientRect()
+            let mouseX = event.clientX, mouseY = event.clientY //which coordinate system should this be?
             //debugger
             territoryBoundaries.forEach(function(value, key){
                 if(isInsidePolygon(value, mouseX, mouseY)){
-                    debugger
                     handler(key)
                 }
             })
         }
         const clickDetected = async function(event){
-            console.log('click');
+            console.log('click at' + event.clientX + "," + event.clientY);
             detected(event, clickHandler)
         }
 
@@ -67,8 +67,9 @@ function Game(props){
 
         const clickHandler = async function(key){
             console.log(key)
-            let _class = tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).getAttribute('class')
-            tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).setAttribute('class', _class + " hovered")
+            //let _style = tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).getAttribute('style')
+            tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).style.fill = 'black'
+            tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).style.fillOpacity = 0.4
         }
         const moveHandler = async function(){
 
@@ -148,11 +149,13 @@ function Game(props){
 
     async function calculateTerritoryBoundaries(){
         debugger
-        let territories = tableRef.current.children['gameSVG'].contentWindow.document.getElementById('layer4').children
+        let _game = tableRef.current.children['gameSVG']
+        let bb = _game.getBoundingClientRect()
+        let territories = _game.contentWindow.document.getElementById('layer4').children
         let idBoundaryMap = new Map()
         for(var i = 0; i < territories.length; i++){
             let territory = territories[i]
-            idBoundaryMap.set(territory.id, pathDToPoly(territory.attributes.d.value))
+            idBoundaryMap.set(territory.id, pathDToPoly(territory.attributes.d.value, 1150/bb.width, 800/bb.height))
         }
         //console.log(idBoundaryMap)
         setTerritoryBoundaries(idBoundaryMap)
@@ -329,7 +332,7 @@ function Game(props){
                 </Table>
             </div>
             <JoinForm joinHandler={joinSubmitHandler} available_colors={gameState.players.available_colors} setLocalColor={setLocalColor} closeHandler={formCloseHandler} show={authctx.isLoggedIn && joinClicked}/>
-            {territoryBoundaries ? <Territory polygon={territoryBoundaries.values().next().value}/> : <></>}
+            {/*territoryBoundaries ? <Territory polygon={territoryBoundaries.values().next().value}/> : <></>*/}
         </Fragment>
     )
 }

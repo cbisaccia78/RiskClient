@@ -45,9 +45,16 @@ function Table(props){
         obj.type = "image/svg+xml"
         obj.className = "gameSVG"
         obj.id = "gameSVG"
-        obj.style = "height: 100%; width: 100%;"
+        obj.style = "height: 100%; width: 100%; position: absolute; top: 0%;"
         const t = document.getElementById("game-table")
         t.appendChild(obj)
+        /*
+        setTimeout(function(){
+            const holder = props.tableRef.current.children['gameSVG']
+            const bb = holder.getBoundingClientRect(), width = bb.width, height = bb.height
+            holder.contentWindow.document.getElementById('svg2').setAttribute('viewBox', `0 0 ${width} ${height}`)
+        }.bind(this), 100)
+        */
         setTimeout(props.calculateTerritoryBoundaries.bind(this), 100)
       }, [])
 

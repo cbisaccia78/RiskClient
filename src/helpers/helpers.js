@@ -48,7 +48,7 @@ export const linearApproxBezier = function(numPoints=2, p_0, p_1, p_2){
    return approximation
 }
 
-export const pathDToPoly = function(d){
+export const pathDToPoly = function(d, a, b){
     //only handles absolute commands for now. 
     var polygon = []
     let full = d.split(" ")
@@ -65,20 +65,26 @@ export const pathDToPoly = function(d){
                 case "L":
                 case "M":
                     params = ele.split(",")
-                    polygon.push({x: parseInt(params[0]), y: parseInt(params[1])})
+                    var x_0 = parseFloat(params[0]), y_0 = parseFloat(params[1])
+                    //var r = x_0 > y_0 ? y_0 / x_0 : x_0 / y_0
+                    //polygon.push({x: x_0 + r*(1-a)*vPx + (1-r)*(1-b)*vPy, y: y_0 + (1-r)*(1-a)*vPx + r*(1-b)*vPy}) #  USE THIS IF ASPECT RATIO MUST BE PRESERVED UPON VIEWBOX CHANGES
+                    polygon.push({x: x_0/a, y: y_0/b})
                     command=true
                     break
                 case "C":
                     
-                        params = ele.split(",")
-                        threePoints.push({x: parseInt(params[0]), y: parseInt(params[1])})
-                        paramNum++
-                        if(paramNum == 4){
-                            polygon = polygon.concat(linearApproxBezier(5, threePoints[0], threePoints[1], threePoints[2]))
-                            paramNum = 1
-                            threePoints = []
-                            command = true
-                        }
+                    params = ele.split(",")
+                    var x_0 = parseFloat(params[0]), y_0 = parseFloat(params[1])
+                    //var r = x_0 > y_0 ? y_0 / x_0 : x_0 / y_0
+                    //polygon.push({x: x_0 + r*(1-a)*vPx + (1-r)*(1-b)*vPy, y: y_0 + (1-r)*(1-a)*vPx + r*(1-b)*vPy})
+                    threePoints.push({x: x_0/a, y: y_0/b})
+                    paramNum++
+                    if(paramNum == 4){
+                        polygon = polygon.concat(linearApproxBezier(3, threePoints[0], threePoints[1], threePoints[2]))
+                        paramNum = 1
+                        threePoints = []
+                        command = true
+                    }
                     break
                 case "c":
                 case "Z":

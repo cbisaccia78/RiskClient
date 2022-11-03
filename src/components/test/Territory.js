@@ -5,10 +5,10 @@ import Point from "./Point";
 const Territory = function(props){
     const ret = createPortal(
         (
-            <>
+            <div style={{position: "relative"}}>
                 {props.polygon.map(point => <Point key={point.x + "-" + point.y}x={point.x} y={point.y}/>)}
-            </>
-        ), document.getElementById('table-background')
+            </div>
+        ), document.getElementById('game-table')
     )
     return ret
 }
