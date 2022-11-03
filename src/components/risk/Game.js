@@ -24,13 +24,15 @@ function Game(props){
     const [territoryBoundaries, setTerritoryBoundaries] = useState(null)
     const [localColor, setLocalColor] = useState(null)
     const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), status: "UNINITIALIZED", players: {playerList: [null,null,null,null,null,null,], turn_stack: [], available_colors: ["blue", "red", "orange", "yellow", "green", "black"]}, deck: {}})
+    const [lastClicked, setLastClicked] = useState("")
+    const [lastHovered, setLastHovered] = useState("")
     const [joinedPosition, setJoinedPosition] = useState(-1)
     const [timerExpired, setTimerExpired] = useState(false)
     const authctx = useContext(AuthContext)
     const themectx = useContext(ThemeContext)
     const location = useLocation();
     const tableRef = useRef(null)
-
+    
     useEffect(function(){
         const establishConnection = async function(){
             if(joined){
@@ -46,6 +48,7 @@ function Game(props){
         if(!tableRef){
             return
         }
+        debugger
         const detected = async function(event, handler){
             let bb = tableRef.current.getBoundingClientRect()
             let mouseX = event.clientX, mouseY = event.clientY //which coordinate system should this be?
@@ -56,32 +59,49 @@ function Game(props){
                 }
             })
         }
-        const clickDetected = async function(event){
+        const clickDetected = function(event){
             console.log('click at' + event.clientX + "," + event.clientY);
             detected(event, clickHandler)
         }
 
-        const moveDetected = async function(event){
+        const boundClick = clickDetected.bind(this)
+
+        const moveDetected = function(event){
             detected(event, moveHandler)
         }
 
-        const clickHandler = async function(key){
+        const boundMove = moveDetected.bind(this)
+
+        const clickHandler = function(key){
+            if(lastClicked && key != lastClicked){
+                tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastClicked).style.fill = 'none'
+                tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastClicked).style.fillOpacity = 1.0
+            }
             console.log(key)
             //let _style = tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).getAttribute('style')
             tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).style.fill = 'black'
             tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).style.fillOpacity = 0.4
+            setLastClicked(key)
         }
-        const moveHandler = async function(){
-
+        const moveHandler = function(key){
+            if(lastHovered && key != lastHovered){
+                tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastHovered).style.fill = 'none'
+                tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastHovered).style.fillOpacity = 1.0
+            }
+            console.log(key)
+            //let _style = tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).getAttribute('style')
+            tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).style.fill = 'black'
+            tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).style.fillOpacity = 0.4
+            setLastHovered(key)
         }
         
-        tableRef.current.children['gameSVG'].contentWindow.addEventListener('click', clickDetected)
-        //window.addEventListener('mousemove', moveDetected)
+        tableRef.current.children['gameSVG'].contentWindow.addEventListener('click', boundClick)
+        //tableRef.current.children['gameSVG'].contentWindow.addEventListener('mousemove', moveDetected)
         return _ => {
-            tableRef.current.children['gameSVG'].contentWindow.removeEventListener('click', clickDetected)
-            //window.removeEventListener('mousemove', moveDetected)
+            tableRef.current.children['gameSVG'].contentWindow.removeEventListener('click', boundClick)
+            //tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousemove', moveDetected)
         }
-    }, [territoryBoundaries])
+    }, [territoryBoundaries, lastClicked, lastHovered])
 
     useEffect(function(){
         const resizeHandler = function(){
@@ -148,7 +168,6 @@ function Game(props){
     }, [timerExpired])
 
     async function calculateTerritoryBoundaries(){
-        debugger
         let _game = tableRef.current.children['gameSVG']
         let bb = _game.getBoundingClientRect()
         let territories = _game.contentWindow.document.getElementById('layer4').children
