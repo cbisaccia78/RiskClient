@@ -28,6 +28,18 @@ export const randInt = function(start, end){
     return start + Math.floor(Math.random()*(end - start))
 }
 
+export const debounce = function(bouncee, time=100){
+    let timer = 0
+    const ret = function(){
+        if(timer < time){
+            timer = setTimeout(bouncee, time)
+        }
+        clearTimeout(timer)
+        bouncee()
+    }
+    return ret
+}
+
 export const linearApproxBezier = function(numPoints=2, p_0, p_1, p_2){
     /*
         parametrize linear interpolants from p0->p1 and p1->p2 between 0-1

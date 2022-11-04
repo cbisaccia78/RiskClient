@@ -2,7 +2,7 @@ import classes from './Table.module.css'
 import React, {useState, useEffect, useContext} from 'react'
 import {tableGeometry, playerPartition, cardPartition} from '../../config'
 import riskboard from "../../RiskBoard.svg"
-import { playerCoordScale } from "../../helpers/helpers"
+import { playerCoordScale, debounce} from "../../helpers/helpers"
 import OpenSeat from './OpenSeat'
 import Player from './Player'
 import Hand from './Hand'
@@ -31,10 +31,11 @@ function Table(props){
         const resizeHandler = (event) => {
             setVPR(calculateVPR())
         }
-        window.addEventListener('resize', resizeHandler)
+        const boundResize = debounce(resizeHandler.bind(this))
+        window.addEventListener('resize', boundResize)
 
         return _ => {
-            window.removeEventListener('resize', resizeHandler)
+            window.removeEventListener('resize', boundResize)
         }
     }, [VPR])
 

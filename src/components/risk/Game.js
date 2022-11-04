@@ -1,6 +1,6 @@
 import React, { useContext, useReducer, useState, useEffect, useRef } from "react";
 import { redirect, useLoaderData, useLocation} from "react-router-dom";
-import { pathDToPoly, isInsidePolygon} from "../../helpers/helpers";
+import { pathDToPoly, isInsidePolygon, debounce} from "../../helpers/helpers";
 import Button from "react-bootstrap/Button";
 import AuthContext from "../../store/auth-context";
 import ThemeContext from "../../store/theme-context";
@@ -23,7 +23,7 @@ function Game(props){
     const [joined, setJoined] = useState(false)
     const [territoryBoundaries, setTerritoryBoundaries] = useState(null)
     const [localColor, setLocalColor] = useState(null)
-    const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), status: "UNINITIALIZED", players: {playerList: [null,null,null,null,null,null,], turn_stack: [], available_colors: ["blue", "red", "orange", "yellow", "green", "black"]}, deck: {}})
+    const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), status: "UNINITIALIZED", queuedAction: {}, players: {playerList: [null,null,null,null,null,null,], turn_stack: [], available_colors: ["blue", "red", "orange", "yellow", "green", "black"]}, deck: {}})
     const [lastClicked, setLastClicked] = useState("")
     const [lastHovered, setLastHovered] = useState("")
     const [joinedPosition, setJoinedPosition] = useState(-1)
@@ -84,10 +84,13 @@ function Game(props){
             if(lastClicked){
                 tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastClicked).style.fill = 'none'
                 tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastClicked).style.fillOpacity = 1.0
+                if(gameState.players.turn_stack && joinedPosition == gameState.players.turn_stack && gameState.status == "INITIALIZED"){
+                    dispatchState(gameState.queuedAction)
+                }
             }
             
             setLastClicked("")
-        }.bind(this)
+        }
 
         const boundClickUp = clickUpHandler.bind(this)
         
@@ -108,8 +111,8 @@ function Game(props){
         
         //tableRef.current.children['gameSVG'].contentWindow.addEventListener('mousemove', moveDetected)
         return _ => {
-            tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousedown', boundClickDown)
-            tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousedown', boundClickUp)
+            //tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousedown', boundClickDown)
+            //tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousedown', boundClickUp)
             //tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousemove', moveDetected)
         }
     }, [territoryBoundaries, lastClicked, lastHovered])
@@ -118,10 +121,11 @@ function Game(props){
         const resizeHandler = function(){
             calculateTerritoryBoundaries()
         }
-        window.addEventListener('resize', resizeHandler.bind(this))
+        const boundResize = debounce(resizeHandler.bind(this))
+        window.addEventListener('resize', boundResize)
 
         return _ => {
-            window.removeEventListener('resize', resizeHandler)
+            window.removeEventListener('resize', boundResize)
         }
     }.bind(this), [])
 
@@ -211,7 +215,7 @@ function Game(props){
                     playerList[player.table_position-1] = _player
                 })
                 
-                return {...prevState, players: {...prevState.players, playerList: playerList}}
+                return {...prevState, queuedAction: {type: 'ACTION', action: {type: 'PLAYER_CHANGE/SELECT_TERRITORY', player: playerList[joinedPosition]}}, players: {...prevState.players, playerList: playerList}}
             case 'STATUS/SET':
                 return {...prevState, status: action.status}
             case 'DECK/SHUFFLE':
@@ -280,27 +284,43 @@ function Game(props){
     function handleAction(prevState, action){
         
         let s = prevState
+        let ret = {...s}
         //handle action
         console.log(action);
         switch(action.type){
             case 'NOOP':
             case 'TURN_CHANGE':
-                let ts = _.cloneDeep(prevState.players.turn_stack)
+                let ts = _.cloneDeep(s.players.turn_stack)
                 let _next = ts.shift()
                 ts.push(_next)
-                s.players.turn_stack = ts 
-                return {...s, players: {...s.players, turn_stack: ts}}
-            case 'ATTACK':
+                ret.players.turn_stack = ts 
+                return ret
+            case 'PLAYER_CHANGE/FORTIFY':
                 console.log();
                 break
-            case 'REINFORCE':
+            case 'PLAYER_CHANGE/REDEEM':
                 console.log();
                 break
-            case 'REDEEM_CARDS':
+            case 'PLAYER_CHANGE/ATTACK':
                 console.log();
                 break
-            case 'FORTIFY':
+            case 'PLAYER_CHANGE/PLACE_ARMIES':
                 console.log();
+                break
+            case 'PLAYER_CHANGE/ELIMINATED':
+                console.log();
+                break
+            case 'PLAYER_CHANGE/ELIMINATOR':
+                break
+            case 'PLAYER_CHANGE/ADD_CARD':
+                break
+            case 'PLAYER_CHANGE/SELECT_TERRITORY':
+                let player = {...action.player, army: {INFANTRY: action.player.INFANTRY - 1, CAVALRY: action.player.CAVALRY, ARTILLERY: action.player.ARTILLERY}, territories: action.player.territories.concat(action.territory)}
+                let playerList = _.cloneDeep(s.players.playerList)
+                playerList[player.table_position-1] = player
+                ret.players.playerList = playerList
+                return ret
+            case 'PLAYER_CHANGE/CONQUER_TERRITORY':
                 break
             default:
                 console.log('Unknown action: '+ action);
