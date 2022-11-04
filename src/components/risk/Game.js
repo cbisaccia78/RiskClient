@@ -61,10 +61,10 @@ function Game(props){
         }
         const clickDetected = function(event){
             console.log('click at' + event.clientX + "," + event.clientY);
-            detected(event, clickHandler)
+            detected(event, clickDownHandler)
         }
 
-        const boundClick = clickDetected.bind(this)
+        const boundClickDown = clickDetected.bind(this)
 
         const moveDetected = function(event){
             detected(event, moveHandler)
@@ -72,17 +72,25 @@ function Game(props){
 
         const boundMove = moveDetected.bind(this)
 
-        const clickHandler = function(key){
-            if(lastClicked && key != lastClicked){
-                tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastClicked).style.fill = 'none'
-                tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastClicked).style.fillOpacity = 1.0
-            }
+        const clickDownHandler = function(key){
             console.log(key)
             //let _style = tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).getAttribute('style')
             tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).style.fill = 'black'
             tableRef.current.children['gameSVG'].contentWindow.document.getElementById(key).style.fillOpacity = 0.4
             setLastClicked(key)
         }
+
+        const clickUpHandler = function(){
+            if(lastClicked){
+                tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastClicked).style.fill = 'none'
+                tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastClicked).style.fillOpacity = 1.0
+            }
+            
+            setLastClicked("")
+        }.bind(this)
+
+        const boundClickUp = clickUpHandler.bind(this)
+        
         const moveHandler = function(key){
             if(lastHovered && key != lastHovered){
                 tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastHovered).style.fill = 'none'
@@ -95,10 +103,13 @@ function Game(props){
             setLastHovered(key)
         }
         
-        tableRef.current.children['gameSVG'].contentWindow.addEventListener('click', boundClick)
+        tableRef.current.children['gameSVG'].contentWindow.addEventListener('mousedown', boundClickDown)
+        tableRef.current.children['gameSVG'].contentWindow.addEventListener('mouseup', boundClickUp)
+        
         //tableRef.current.children['gameSVG'].contentWindow.addEventListener('mousemove', moveDetected)
         return _ => {
-            tableRef.current.children['gameSVG'].contentWindow.removeEventListener('click', boundClick)
+            tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousedown', boundClickDown)
+            tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousedown', boundClickUp)
             //tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousemove', moveDetected)
         }
     }, [territoryBoundaries, lastClicked, lastHovered])
