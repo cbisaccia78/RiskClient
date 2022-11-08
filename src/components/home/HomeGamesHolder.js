@@ -3,16 +3,16 @@ import React from "react";
 import GamesList from './GamesList';
 import { Button } from 'react-bootstrap';
 //import GameForm from '../UI/GameForm';
-import { useState, useContext} from 'react';
+import { useState, useContext, useEffect} from 'react';
 import {Navigate} from 'react-router-dom'
 import AuthContext from '../../store/auth-context';
 import Alert from 'react-bootstrap/Alert'
-
 
 export default function(){
     const [createClicked, setCreateClicked] = useState(false)
     const [rejoinClicked, setRejoinClicked] = useState(false)
     const authctx = useContext(AuthContext)
+
     return ( 
         createClicked && authctx.isLoggedIn ? 
             <Navigate replace to="/game/create"/> 

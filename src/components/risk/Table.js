@@ -9,17 +9,6 @@ import Hand from './Hand'
 import AuthContext from '../../store/auth-context'
 import Timer from '../UI/Timer'
 
-const determineCountry = (evt) => {
-  /*const { mouseX, mouseY } = evt.getXY // need to find actual method
-    for each country
-        if isInsidePolygon(country, mouseX, mouseY)
-            return country.name
-    return "none"  
-  
-  */
-    return null;
-}
-
 function Table(props){
     //const authctx = useContext(AuthContext)
     let players = props.players
@@ -56,7 +45,7 @@ function Table(props){
             holder.contentWindow.document.getElementById('svg2').setAttribute('viewBox', `0 0 ${width} ${height}`)
         }.bind(this), 100)
         */
-        setTimeout(props.calculateTerritoryBoundaries.bind(this), 100)
+        setTimeout(props.calculateTerritoryBoundaries.bind(this), 500)
       }, [])
 
       
@@ -122,7 +111,7 @@ function Table(props){
     }
 
     return (
-        <div ref={props.tableRef} className={classes.gameTable} id="game-table" onClick = {determineCountry}>
+        <div ref={props.tableRef} className={classes.gameTable} id="game-table">
             {players.filter(val => val != null).map((player) => {
                     let modified = props.turn == player.table_position && props.started
                     return (

@@ -11,8 +11,6 @@ import JoinForm from "../UI/JoinForm";
 import {insertTurn, deleteTurn} from '../../helpers/helpers'
 import {socketManager} from "../../helpers/SocketManager";
 import _ from "lodash"
-import { isDOMComponent } from "react-dom/test-utils";
-import Territory from "../test/Territory";
 
 
 
@@ -23,7 +21,7 @@ function Game(props){
     const [joined, setJoined] = useState(false)
     const [territoryBoundaries, setTerritoryBoundaries] = useState(null)
     const [localColor, setLocalColor] = useState(null)
-    const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), status: "UNINITIALIZED", queuedAction: {}, players: {playerList: [null,null,null,null,null,null,], turn_stack: [], available_colors: ["blue", "red", "orange", "yellow", "green", "black"]}, deck: {}})
+    const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), status: "UNINITIALIZED", queuedAction: {}, players: {playerList: [null,null,null,null,null,null,], turn_stack: [], available_colors: ["blue", "red", "orange", "yellow", "green", "black"]}, available_territories: ['eastern_australia', 'indonesia', 'new_guinea', 'alaska', 'ontario', 'northwest_territory', 'venezuela', 'madagascar', 'north_africa', 'greenland', 'iceland', 'great_britain', 'scandinavia', 'japan', 'yakursk', 'kamchatka', 'siberia', 'ural', 'afghanistan', 'middle_east', 'india', 'siam', 'china', 'mongolia', 'irkutsk', 'ukraine', 'southern_europe', 'western_europe', 'northern_europe', 'egypt', 'east_africa', 'congo', 'south_africa', 'brazil', 'argentina', 'eastern_united_states', 'western_united_states', 'quebec', 'central_america', 'peru', 'western_australia', 'alberta'], deck: {}})
     const [lastClicked, setLastClicked] = useState("")
     const [lastHovered, setLastHovered] = useState("")
     const [joinedPosition, setJoinedPosition] = useState(-1)
@@ -36,7 +34,7 @@ function Game(props){
     useEffect(function(){
         const establishConnection = async function(){
             if(joined){
-                let action = {type: "JOIN", user_id: authctx.id, player: { color: localColor,  icon: authctx.profilePicBuffer, table_position: joinedPosition}}
+                let action = {type: "JOIN", user_id: authctx.id, player: { color: localColor,  icon: authctx.profilePicBuffer, table_position: joinedPosition, territories: []}}
                 socketManager.send(action)
             }
         }
@@ -48,11 +46,9 @@ function Game(props){
         if(!tableRef){
             return
         }
-        debugger
         const detected = async function(event, handler){
             let bb = tableRef.current.getBoundingClientRect()
             let mouseX = event.clientX, mouseY = event.clientY //which coordinate system should this be?
-            //debugger
             territoryBoundaries.forEach(function(value, key){
                 if(isInsidePolygon(value, mouseX, mouseY)){
                     handler(key)
@@ -80,19 +76,20 @@ function Game(props){
             setLastClicked(key)
         }
 
-        const clickUpHandler = function(){
+        const clickUpHandler = function(user_id){
             if(lastClicked){
                 tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastClicked).style.fill = 'none'
                 tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastClicked).style.fillOpacity = 1.0
-                if(gameState.players.turn_stack && joinedPosition == gameState.players.turn_stack && gameState.status == "INITIALIZED"){
-                    dispatchState(gameState.queuedAction)
+                if(gameState.players.turn_stack && joinedPosition == gameState.players.turn_stack[0] && gameState.status != "UNINITIALIZED"){
+                    socketManager.send({user_id: user_id, type: 'ACTION', action: {type: 'PLAYER_CHANGE/SELECT_TERRITORY', territory: lastClicked}})
+                    socketManager.send({type: "ACTION", user_id: user_id, action: {type: "TURN_CHANGE"}})
                 }
             }
             
             setLastClicked("")
         }
 
-        const boundClickUp = clickUpHandler.bind(this)
+        const boundClickUp = clickUpHandler.bind(this, authctx.id)
         
         const moveHandler = function(key){
             if(lastHovered && key != lastHovered){
@@ -111,8 +108,11 @@ function Game(props){
         
         //tableRef.current.children['gameSVG'].contentWindow.addEventListener('mousemove', moveDetected)
         return _ => {
-            //tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousedown', boundClickDown)
-            //tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousedown', boundClickUp)
+            if(tableRef.current){
+                tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousedown', boundClickDown)
+                tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousedown', boundClickUp)
+            }
+            
             //tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousemove', moveDetected)
         }
     }, [territoryBoundaries, lastClicked, lastHovered])
@@ -121,7 +121,7 @@ function Game(props){
         const resizeHandler = function(){
             calculateTerritoryBoundaries()
         }
-        const boundResize = debounce(resizeHandler.bind(this))
+        const boundResize = resizeHandler.bind(this)
         window.addEventListener('resize', boundResize)
 
         return _ => {
@@ -183,6 +183,7 @@ function Game(props){
     }, [timerExpired])
 
     async function calculateTerritoryBoundaries(){
+        //debugger
         let _game = tableRef.current.children['gameSVG']
         let bb = _game.getBoundingClientRect()
         let territories = _game.contentWindow.document.getElementById('layer4').children
@@ -215,7 +216,7 @@ function Game(props){
                     playerList[player.table_position-1] = _player
                 })
                 
-                return {...prevState, queuedAction: {type: 'ACTION', action: {type: 'PLAYER_CHANGE/SELECT_TERRITORY', player: playerList[joinedPosition]}}, players: {...prevState.players, playerList: playerList}}
+                return {...prevState, players: {...prevState.players, playerList: playerList}}
             case 'STATUS/SET':
                 return {...prevState, status: action.status}
             case 'DECK/SHUFFLE':
@@ -285,6 +286,7 @@ function Game(props){
         
         let s = prevState
         let ret = {...s}
+        let player, _player
         //handle action
         console.log(action);
         switch(action.type){
@@ -315,7 +317,12 @@ function Game(props){
             case 'PLAYER_CHANGE/ADD_CARD':
                 break
             case 'PLAYER_CHANGE/SELECT_TERRITORY':
-                let player = {...action.player, army: {INFANTRY: action.player.INFANTRY - 1, CAVALRY: action.player.CAVALRY, ARTILLERY: action.player.ARTILLERY}, territories: action.player.territories.concat(action.territory)}
+                if(!(s.players.available_territories.includes(action.territory))){
+                    return ret
+                }
+                _player = s.players.playerList[s.players.turn_stack[0]-1]
+                console.log(_player)
+                player = {..._player, army: {INFANTRY: _player.INFANTRY - 1, CAVALRY: _player.CAVALRY, ARTILLERY: _player.ARTILLERY}, territories:_player.territories.concat(action.territory)}
                 let playerList = _.cloneDeep(s.players.playerList)
                 playerList[player.table_position-1] = player
                 ret.players.playerList = playerList
@@ -373,12 +380,12 @@ function Game(props){
     return (
         <Fragment>
             <div className={classes.gameBackground} id="table-background">
-                {gameState.status == "INITIALIZED" && joinedPosition == turn ?
+                {gameState.status != "UNINITIALIZED" && joinedPosition == turn ?
                 <Button onClick={noOp.bind(this)}>NOOP</Button>
                   
                  : <></>}
                 {gameState.status == "UNINITIALIZED" && joined ? <Button variant="success" onClick={startGame}>Start Game</Button> : <></>}
-                <Table key={`table-turn-${turn}`} onBoardClick={boardClickHandler} tableRef={tableRef} calculateTerritoryBoundaries={calculateTerritoryBoundaries} players={gameState.players.playerList} started={gameState.status == "INITIALIZED"} turn={turn} setTimerExpired={setTimerExpired} totalTime={120} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
+                <Table key={`table-turn-${turn}`} onBoardClick={boardClickHandler} tableRef={tableRef} calculateTerritoryBoundaries={calculateTerritoryBoundaries} players={gameState.players.playerList} started={gameState.status != "UNINITIALIZED"} turn={turn} setTimerExpired={setTimerExpired} totalTime={120} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
                 </Table>
             </div>
             <JoinForm joinHandler={joinSubmitHandler} available_colors={gameState.players.available_colors} setLocalColor={setLocalColor} closeHandler={formCloseHandler} show={authctx.isLoggedIn && joinClicked}/>

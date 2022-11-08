@@ -24,6 +24,7 @@ export default function(props){
             }
         }
         getGames()
+        setInterval(getGames.bind(this), 5000)//need to clear this interval when you leave home page
     }.bind(this), [])
     return (
     <Table hover striped>

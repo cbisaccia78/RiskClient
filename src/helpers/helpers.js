@@ -29,6 +29,9 @@ export const randInt = function(start, end){
 }
 
 export const debounce = function(bouncee, time=100){
+    //
+    return bouncee
+    /*
     let timer = 0
     const ret = function(){
         if(timer < time){
@@ -38,6 +41,7 @@ export const debounce = function(bouncee, time=100){
         bouncee()
     }
     return ret
+    */
 }
 
 export const linearApproxBezier = function(numPoints=2, p_0, p_1, p_2){
