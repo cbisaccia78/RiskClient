@@ -2,10 +2,10 @@ import classes from './Table.module.css'
 import React, {useState, useEffect, useContext} from 'react'
 import {tableGeometry, playerPartition, cardPartition} from '../../config'
 import riskboard from "../../RiskBoard.svg"
-import { playerCoordScale, debounce} from "../../helpers/helpers"
+import { playerCoordScale, debounce, delay} from "../../helpers/helpers"
 import OpenSeat from './OpenSeat'
 import Player from './Player'
-import Hand from './Hand'
+import ArmyCount from './ArmyCount'
 import AuthContext from '../../store/auth-context'
 import Timer from '../UI/Timer'
 
@@ -45,10 +45,13 @@ function Table(props){
             holder.contentWindow.document.getElementById('svg2').setAttribute('viewBox', `0 0 ${width} ${height}`)
         }.bind(this), 100)
         */
-        setTimeout(props.calculateTerritoryBoundaries.bind(this), 500)
+        setTimeout(tableEffect.bind(this), 500)
       }, [])
 
-      
+    function tableEffect(){
+        props.calculateTerritoryBoundaries.call(this)
+        let territories = props.tableRef.current.children['gameSVG'].contentWindow.document.getElementById('layer4').children
+    }
 
     function calculateVPR(){
         //this needs to ensure that 1.4447761194029851 ratio does not break
@@ -110,6 +113,7 @@ function Table(props){
         }
     }
 
+
     return (
         <div ref={props.tableRef} className={classes.gameTable} id="game-table">
             {players.filter(val => val != null).map((player) => {
@@ -119,6 +123,7 @@ function Table(props){
                         
                         <Player key={`player-${player.table_position}`} extraClasses={modified ? "covered" : ""} setTimerExpired={props.setTimerExpired} totalTime={props.totalTime} data={player} generatePosition={playerPosition.bind(this, player.table_position)}/>
                         {modified ? <Timer key={`timer-${props.turn}`} position={player.table_position} generatePosition={playerPosition.bind(this, player.table_position)} totalTime={120} setTimerExpired={props.setTimerExpired}/> : <></>}
+                        {props.started ? player.territories.map(function(color=player.color, territory){return <ArmyCount color={color} count={territory}/>}) : <></>}
                         {/*<Hand key={`hand-${player.position}`} hand={player.hand} playerPos={player.position} cardPosition={cardPosition}/>*/}
                     </>)
                 })

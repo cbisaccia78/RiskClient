@@ -24,6 +24,10 @@ export const range = function(start, end){
     return range
 }
 
+export const delay = t => {
+    return new Promise(resolve => {setTimeout(resolve, t)})
+}
+
 export const randInt = function(start, end){
     return start + Math.floor(Math.random()*(end - start))
 }
