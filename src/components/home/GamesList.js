@@ -17,7 +17,6 @@ export default function(props){
             try {
                 const response = await fetch("http://localhost:3001/games/active")
                 const parsed = await response.json()
-                console.log(parsed)
                 setGameList(parsed)
             } catch (error){
                 console.error(error)

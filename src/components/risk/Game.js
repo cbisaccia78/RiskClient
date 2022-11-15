@@ -34,7 +34,7 @@ function Game(props){
     useEffect(function(){
         const establishConnection = async function(){
             if(joined){
-                let action = {type: "JOIN", user_id: authctx.id, player: { color: localColor,  icon: authctx.profilePicBuffer, table_position: joinedPosition, territories: []}}
+                let action = {type: "JOIN", user_id: authctx.id, player: { color: localColor,  icon: authctx.profilePicBuffer, table_position: joinedPosition, territories: new Map()}}
                 socketManager.send(action)
             }
         }
@@ -212,7 +212,7 @@ function Game(props){
                 const playerList = _.cloneDeep(prevState.players.playerList)
                 playerList.filter(player=>player != null).forEach(function(player){
                     const numInfantry = 40 - (prevState.players.turn_stack.length - 2)*5
-                    const _player = {...player, army: {INFANTRY: numInfantry, CAVALRY: 0, ARTILLERY: 0}}
+                    const _player = {...player, army: numInfantry, territories: new Map()}
                     playerList[player.table_position-1] = _player
                 })
                 
@@ -320,10 +320,20 @@ function Game(props){
                 if(!(s.players.available_territories.includes(action.territory))){
                     return ret
                 }
+                let available_territories = _.cloneDeep(s.players.available_territories)
+                available_territories.splice(available_territories.indexOf(action.territory), 1)
+                ret.players.available_territories = available_territories
+
                 _player = s.players.playerList[s.players.turn_stack[0]-1]
-                console.log(_player)
-                player = {..._player, army: {INFANTRY: _player.INFANTRY - 1, CAVALRY: _player.CAVALRY, ARTILLERY: _player.ARTILLERY}, territories:_player.territories.concat(action.territory)}
+
+                let territories = _.cloneDeep(_player.territories)
+                let prev = territories.get(action.territory)
+                territories.set(action.territory, prev ? prev + 1 : 1)
+
+                player = {..._player, army: _player.army - 1, territories: territories}
+                
                 let playerList = _.cloneDeep(s.players.playerList)
+                
                 playerList[player.table_position-1] = player
                 ret.players.playerList = playerList
                 return ret
