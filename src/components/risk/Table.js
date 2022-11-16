@@ -29,7 +29,7 @@ function Table(props){
     }, [VPR])
 
     useEffect(()=>{
-
+        debugger
         let obj = document.createElement("object")
         obj.data = riskboard
         obj.type = "image/svg+xml"
@@ -50,7 +50,6 @@ function Table(props){
 
     function tableEffect(){
         props.calculateTerritoryBoundaries.call(this)
-        let territories = props.tableRef.current.children['gameSVG'].contentWindow.document.getElementById('layer4').children
     }
 
     function calculateVPR(){
