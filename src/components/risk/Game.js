@@ -81,7 +81,12 @@ function Game(props){
                 tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastClicked).style.fill = 'none'
                 tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastClicked).style.fillOpacity = 1.0
                 if(gameState.players.turn_stack && joinedPosition == gameState.players.turn_stack[0] && gameState.status != "UNINITIALIZED"){
-                    socketManager.send({user_id: user_id, type: 'ACTION', action: {type: 'PLAYER_CHANGE/SELECT_TERRITORY', territory: lastClicked}})
+                    if(gameState.players.available_territories.includes(lastClicked)){
+                        if(gameState.status == "INITIAL_ARMY_PLACEMENT")socketManager.send({user_id: user_id, type: 'ACTION', action: {type: 'PLAYER_CHANGE/SELECT_TERRITORY', territory: lastClicked}})
+                    }else{
+                        debugger
+                        if(gameState.status == "INITIAL_ARMY_PLACEMENT" && gameState.players.playerList[gameState.players.turn_stack[0]-1].territories.has(lastClicked))socketManager.send({user_id: user_id, type: 'ACTION', action: {type: 'PLAYER_CHANGE/PLACE_ARMIES', territory: lastClicked, count: 1}})
+                    }
                     socketManager.send({type: "ACTION", user_id: user_id, action: {type: "TURN_CHANGE"}})
                 }
             }
@@ -110,7 +115,7 @@ function Game(props){
         return _ => {
             if(tableRef.current){
                 tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousedown', boundClickDown)
-                tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousedown', boundClickUp)
+                tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mouseup', boundClickUp)
             }
             
             //tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousemove', moveDetected)
@@ -306,9 +311,21 @@ function Game(props){
             case 'PLAYER_CHANGE/ATTACK':
                 console.log();
                 break
-            case 'PLAYER_CHANGE/PLACE_ARMIES':
-                console.log();
-                break
+            case 'PLAYER_CHANGE/PLACE_ARMIES': {
+
+                _player = s.players.playerList[s.players.turn_stack[0]-1]
+                
+                let prev = _player.territories.get(action.territory)
+                console.log('prev', prev);
+                _player.territories.set(action.territory, prev ? prev + action.count : action.count)
+
+                player = {..._player, army: _player.army - action.count, territories: new Map(_player.territories)}
+                
+                let playerList = _.cloneDeep(s.players.playerList)
+                
+                playerList[player.table_position-1] = player
+                ret.players.playerList = playerList
+                return ret }
             case 'PLAYER_CHANGE/ELIMINATED':
                 console.log();
                 break
@@ -316,7 +333,7 @@ function Game(props){
                 break
             case 'PLAYER_CHANGE/ADD_CARD':
                 break
-            case 'PLAYER_CHANGE/SELECT_TERRITORY':
+            case 'PLAYER_CHANGE/SELECT_TERRITORY': {
                 if(!(s.players.available_territories.includes(action.territory))){
                     return ret
                 }
@@ -325,18 +342,18 @@ function Game(props){
                 ret.players.available_territories = available_territories
 
                 _player = s.players.playerList[s.players.turn_stack[0]-1]
+                
+                let prev = _player.territories.get(action.territory)
+                console.log('prev', prev);
+                _player.territories.set(action.territory, prev ? prev + 1 : 1)
 
-                let territories = _.cloneDeep(_player.territories)
-                let prev = territories.get(action.territory)
-                territories.set(action.territory, prev ? prev + 1 : 1)
-
-                player = {..._player, army: _player.army - 1, territories: territories}
+                player = {..._player, army: _player.army - 1, territories: new Map(_player.territories)}
                 
                 let playerList = _.cloneDeep(s.players.playerList)
                 
                 playerList[player.table_position-1] = player
                 ret.players.playerList = playerList
-                return ret
+                return ret }
             case 'PLAYER_CHANGE/CONQUER_TERRITORY':
                 break
             default:
