@@ -4,7 +4,6 @@ import { Button } from "react-bootstrap";
 import "./ArmyCount.css"
 
 const ArmyCount = (props) => {
-    console.log(props);
     let gameSVG = props.board.current.children['gameSVG']
     let territoryBB =  gameSVG.contentWindow.document.getElementById(props.territory).getBoundingClientRect()
     return createPortal((

@@ -81,19 +81,24 @@ function Game(props){
                 tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastClicked).style.fill = 'none'
                 tableRef.current.children['gameSVG'].contentWindow.document.getElementById(lastClicked).style.fillOpacity = 1.0
                 if(gameState.players.turn_stack && joinedPosition == gameState.players.turn_stack[0] && gameState.status != "UNINITIALIZED"){
-                    if(gameState.players.available_territories.includes(lastClicked)){
-                        if(gameState.status == "INITIAL_ARMY_PLACEMENT"){
-                            socketManager.send({user_id: user_id, type: 'ACTION', action: {type: 'PLAYER_CHANGE/SELECT_TERRITORY', territory: lastClicked}})
-                            socketManager.send({type: "ACTION", user_id: user_id, action: {type: "TURN_CHANGE"}})
-                        }
-                    }else{
-                        debugger
-                        if(gameState.status == "INITIAL_ARMY_PLACEMENT" && gameState.players.playerList[gameState.players.turn_stack[0]-1].territories.has(lastClicked)){
-                            socketManager.send({user_id: user_id, type: 'ACTION', action: {type: 'PLAYER_CHANGE/PLACE_ARMIES', territory: lastClicked, count: 1}})
-                            socketManager.send({type: "ACTION", user_id: user_id, action: {type: "TURN_CHANGE"}})
-                        }
+                    switch(gameState.status){
+                        case "INITIAL_ARMY_PLACEMENT":
+                            if(gameState.players.available_territories.includes(lastClicked)){
+                                socketManager.send({user_id: user_id, type: 'ACTION', action: {type: 'PLAYER_CHANGE/SELECT_TERRITORY', territory: lastClicked}})
+                                socketManager.send({type: "ACTION", user_id: user_id, action: {type: "TURN_CHANGE"}})
+                            }else{
+                                if(gameState.players.playerList[gameState.players.turn_stack[0]-1].territories.has(lastClicked)){
+                                    socketManager.send({user_id: user_id, type: 'ACTION', action: {type: 'PLAYER_CHANGE/PLACE_ARMIES', territory: lastClicked, count: 1}})
+                                    socketManager.send({type: "ACTION", user_id: user_id, action: {type: "TURN_CHANGE"}})
+                                }
+                            }
+                            break
+                        case "POST_SETUP":
+                            console.log("POST_SETUP");
+                            break
+                        default:
+                            break
                     }
-                    
                 }
             }
             
