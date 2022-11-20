@@ -21,7 +21,7 @@ function Game(props){
     const [joined, setJoined] = useState(false)
     const [territoryBoundaries, setTerritoryBoundaries] = useState(null)
     const [localColor, setLocalColor] = useState(null)
-    const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), status: "UNINITIALIZED", queuedAction: {}, players: {playerList: [null,null,null,null,null,null,], turn_stack: [], available_colors: ["blue", "red", "orange", "yellow", "green", "black"],  available_territories: ['eastern_australia', 'indonesia', 'new_guinea', 'alaska', 'ontario', 'northwest_territory', 'venezuela', 'madagascar', 'north_africa', 'greenland', 'iceland', 'great_britain', 'scandinavia', 'japan', 'yakursk', 'kamchatka', 'siberia', 'ural', 'afghanistan', 'middle_east', 'india', 'siam', 'china', 'mongolia', 'irkutsk', 'ukraine', 'southern_europe', 'western_europe', 'northern_europe', 'egypt', 'east_africa', 'congo', 'south_africa', 'brazil', 'argentina', 'eastern_united_states', 'western_united_states', 'quebec', 'central_america', 'peru', 'western_australia', 'alberta']}, deck: {}})
+    const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), status: "UNINITIALIZED", queuedAction: {}, players: {playerList: [null,null,null,null,null,null,], turn_stack: [], available_colors: ["blue", "red", "orange", "yellow", "green", "black"],  available_territories: ['eastern_australia', 'indonesia', 'new_guinea', 'alaska', 'ontario', 'northwest_territory', 'venezuela', 'madagascar', 'north_africa', 'greenland', 'iceland', 'great_britain', 'scandinavia', 'japan', 'yakursk', 'kamchatka', 'siberia', 'ural', 'afghanistan', 'middle_east', 'india', 'siam', 'china', 'mongolia', 'irkutsk', 'ukraine', 'southern_europe', 'western_europe', 'northern_europe', 'egypt', 'east_africa', 'congo', 'south_africa', 'brazil', 'argentina', 'eastern_united_states', 'western_united_states', 'quebec', 'central_america', 'peru', 'western_australia', 'alberta'], available_secrets: ["capture Europe, Australia and one other continent","capture Europe, South America and one other continent","capture North America and Africa","capture Asia and South America","capture North America and Australia","capture 24 territories","destroy all armies of a named opponent or, in the case of being the named player oneself, to capture 24 territories","capture 18 territories and occupy each with two troops"]}, deck: {}})
     const [lastClicked, setLastClicked] = useState("")
     const [lastHovered, setLastHovered] = useState("")
     const [joinedPosition, setJoinedPosition] = useState(-1)
@@ -56,7 +56,7 @@ function Game(props){
             })
         }
         const clickDetected = function(event){
-            console.log('click at' + event.clientX + "," + event.clientY);
+            //console.log('click at' + event.clientX + "," + event.clientY);
             detected(event, clickDownHandler)
         }
 
@@ -134,7 +134,6 @@ function Game(props){
     }, [territoryBoundaries, lastClicked, lastHovered])
 
     useEffect(function(){
-        debugger
         const resizeHandler = function(){
             calculateTerritoryBoundaries()
         }
@@ -227,13 +226,16 @@ function Game(props){
                 return removePlayer(prevState, action.player)
             case 'PLAYER_CHANGE/INITIALIZE_ALL':
                 const playerList = _.cloneDeep(prevState.players.playerList)
+                const available_secrets = _.cloneDeep(prevState.players.available_secrets)
                 playerList.filter(player=>player != null).forEach(function(player){
                     const numInfantry = 40 - (prevState.players.turn_stack.length - 2)*5
-                    const _player = {...player, army: numInfantry, territories: new Map()}
+                    
+                    const secretIndex = Math.floor(Math.random()*available_secrets.length)
+                    const _player = {...player, army: numInfantry, territories: new Map(), secretMission: available_secrets.splice(secretIndex, 1)}
                     playerList[player.table_position-1] = _player
                 })
                 
-                return {...prevState, players: {...prevState.players, playerList: playerList}}
+                return {...prevState, players: {...prevState.players, playerList: playerList, available_secrets: available_secrets}}
             case 'STATUS/SET':
                 return {...prevState, status: action.status}
             case 'DECK/SHUFFLE':
@@ -314,9 +316,14 @@ function Game(props){
                 ts.push(_next)
                 ret.players.turn_stack = ts 
                 return ret
-            case 'PLAYER_CHANGE/FORTIFY':
-                console.log();
-                break
+            case 'PLAYER_CHANGE/FORTIFY':{
+                console.log("IN FORTIFY");
+                _player = s.players.playerList[s.players.turn_stack[0]-1]
+                player = {..._player, army: _player.army + action.count}
+                let playerList = _.cloneDeep(s.players.playerList)
+                playerList[player.table_position-1] = player
+                ret.players.playerList = playerList
+                return ret }
             case 'PLAYER_CHANGE/REDEEM':
                 console.log();
                 break
@@ -419,10 +426,10 @@ function Game(props){
     return (
         <Fragment>
             <div className={classes.gameBackground} id="table-background">
-                {gameState.status != "UNINITIALIZED" && joinedPosition == turn ?
+                {/*gameState.status != "UNINITIALIZED" && joinedPosition == turn ?
                 <Button onClick={noOp.bind(this)}>NOOP</Button>
                   
-                 : <></>}
+                : <></>*/}
                 {gameState.status == "UNINITIALIZED" && joined ? <Button variant="success" onClick={startGame}>Start Game</Button> : <></>}
                 <Table onBoardClick={boardClickHandler} tableRef={tableRef} calculateTerritoryBoundaries={calculateTerritoryBoundaries} players={gameState.players.playerList} started={gameState.status != "UNINITIALIZED"} turn={turn} setTimerExpired={setTimerExpired} totalTime={120} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
                 </Table>
