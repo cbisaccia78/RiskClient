@@ -85,11 +85,9 @@ function Game(props){
                         case "INITIAL_ARMY_PLACEMENT":
                             if(gameState.players.available_territories.includes(lastClicked)){
                                 socketManager.send({user_id: user_id, type: 'ACTION', action: {type: 'PLAYER_CHANGE/SELECT_TERRITORY', territory: lastClicked}})
-                                socketManager.send({type: "ACTION", user_id: user_id, action: {type: "TURN_CHANGE"}})
                             }else{
                                 if(gameState.players.playerList[gameState.players.turn_stack[0]-1].territories.has(lastClicked)){
                                     socketManager.send({user_id: user_id, type: 'ACTION', action: {type: 'PLAYER_CHANGE/PLACE_ARMIES', territory: lastClicked, count: 1}})
-                                    socketManager.send({type: "ACTION", user_id: user_id, action: {type: "TURN_CHANGE"}})
                                 }
                             }
                             break
