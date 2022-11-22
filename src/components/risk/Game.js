@@ -1,6 +1,6 @@
 import React, { useContext, useReducer, useState, useEffect, useRef } from "react";
 import { redirect, useLoaderData, useLocation} from "react-router-dom";
-import { pathDToPoly, isInsidePolygon, debounce} from "../../helpers/helpers";
+import { pathDToPoly, isInsidePolygon, debounce, TerritoryCardMap} from "../../helpers/helpers";
 import Button from "react-bootstrap/Button";
 import AuthContext from "../../store/auth-context";
 import ThemeContext from "../../store/theme-context";
@@ -229,7 +229,7 @@ function Game(props){
                     const numInfantry = 40 - (prevState.players.turn_stack.length - 2)*5
                     
                     const secretIndex = Math.floor(Math.random()*available_secrets.length)
-                    const _player = {...player, army: numInfantry, territories: new Map(), secretMission: available_secrets.splice(secretIndex, 1)}
+                    const _player = {...player, army: numInfantry, territories: new Map(), secretMission: available_secrets.splice(secretIndex, 1), territory_cards: new Set()}
                     playerList[player.table_position-1] = _player
                 })
                 
@@ -314,13 +314,15 @@ function Game(props){
                 ts.push(_next)
                 ret.players.turn_stack = ts 
                 return ret
-            case 'PLAYER_CHANGE/FORTIFY':{
-                console.log("IN FORTIFY");
+            case 'PLAYER_CHANGE/DRAFT_TROOPS':{
+                console.log("DRAFTING");
                 _player = s.players.playerList[s.players.turn_stack[0]-1]
                 player = {..._player, army: _player.army + action.count}
                 let playerList = _.cloneDeep(s.players.playerList)
                 playerList[player.table_position-1] = player
                 ret.players.playerList = playerList
+                return ret }
+            case 'PLAYER_CHANGE/FORTIFY':{
                 return ret }
             case 'PLAYER_CHANGE/REDEEM':
                 console.log();
@@ -417,6 +419,56 @@ function Game(props){
         socketManager.send({type: "ACTION", user_id: authctx.id, action: {type: "NOOP"}})
     }
 
+    const redeemAction = function(){
+        let player = gameState.players.playerList[gameState.players.turn_stack[0]-1]
+        let m = new Map()
+        m.set(0,[])
+        m.set(1,[])
+        m.set(2,[])
+        m.set(3,[])
+        for(var key of player.territories.keys()){
+            let group = TerritoryCardMap[key]
+            let old = m.get(group)
+            old.push(key)
+            m.set(group, old)
+            let new0 = m.get(0), new1=m.get(1), new2=m.get(2), new3=m.get(3)
+            if(old.length + 1 == 3){
+                socketManager.send({type: "ACTION", user_id: authctx.id, action: {type: "PLAYER_CHANGE/REDEEM", territory_cards: old}})
+                return true
+            }else if(new0 && new1 && new2){
+                socketManager.send({
+                    type: "ACTION", user_id: authctx.id, 
+                    action: {type: "PLAYER_CHANGE/REDEEM", 
+                    territory_cards: [new0[0], new1[0], new2[0]]}
+                })
+                return true
+            }else if(new0 && new1 && new3){
+                socketManager.send({
+                    type: "ACTION", user_id: authctx.id, 
+                    action: {type: "PLAYER_CHANGE/REDEEM", 
+                    territory_cards: [new0[0], new1[0], new3[0]]}
+                })
+                return true
+            }else if(new0 && new2 && new3){
+                socketManager.send({
+                    type: "ACTION", user_id: authctx.id, 
+                    action: {type: "PLAYER_CHANGE/REDEEM", 
+                    territory_cards: [new0[0], new2[0], new3[0]]}
+                })
+                return true
+            }
+            else if(new1 && new2 && new3){
+                socketManager.send({
+                    type: "ACTION", user_id: authctx.id, 
+                    action: {type: "PLAYER_CHANGE/REDEEM", 
+                    territory_cards: [new1[0], new2[0], new3[0]]}
+                })
+                return true
+            }
+        }
+        return false
+    }
+
 
     //useEffect(()=>{}, [playerToAct])
     let ts = gameState.players.turn_stack
@@ -429,7 +481,7 @@ function Game(props){
                   
                 : <></>*/}
                 {gameState.status == "UNINITIALIZED" && joined ? <Button variant="success" onClick={startGame}>Start Game</Button> : <></>}
-                <Table onBoardClick={boardClickHandler} tableRef={tableRef} calculateTerritoryBoundaries={calculateTerritoryBoundaries} players={gameState.players.playerList} started={gameState.status != "UNINITIALIZED"} turn={turn} setTimerExpired={setTimerExpired} totalTime={120} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition}>
+                <Table onBoardClick={boardClickHandler} tableRef={tableRef} calculateTerritoryBoundaries={calculateTerritoryBoundaries} players={gameState.players.playerList} started={gameState.status != "UNINITIALIZED"} turn={turn} setTimerExpired={setTimerExpired} totalTime={120} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition} status={gameState.status} redeemAction={redeemAction}>
                 </Table>
             </div>
             <JoinForm joinHandler={joinSubmitHandler} available_colors={gameState.players.available_colors} setLocalColor={setLocalColor} closeHandler={formCloseHandler} show={authctx.isLoggedIn && joinClicked}/>

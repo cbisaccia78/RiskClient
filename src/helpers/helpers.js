@@ -28,6 +28,24 @@ export const delay = t => {
     return new Promise(resolve => {setTimeout(resolve, t)})
 }
 
+export const TerritoryCardMap = {
+    'eastern_australia' : 0, 'indonesia' : 1, 'new_guinea': 2, 
+    'alaska': 0, 'ontario' : 1, 'northwest_territory': 2, 
+    'venezuela': 0, 'madagascar' : 1, 'north_africa': 2, 
+    'greenland': 0, 'iceland' : 1, 'great_britain': 2, 
+    'scandinavia': 0, 'japan' : 1, 'yakursk': 2, 
+    'siberia': 0, 'ural' : 1, 'afghanistan': 2, 
+    'india': 0, 'siam' : 1, 'china': 2,  
+    'ukraine': 0, 'southern_europe' : 1, 'western_europe': 2,
+    'northern_europe': 0, 'egypt' : 1, 'east_africa': 2,
+    'congo': 0, 'south_africa' : 1, 'brazil': 2, 
+    'eastern_united_states': 0, 'western_united_states': 1, 'middle_east': 2,
+    'quebec': 0, 'central_america': 1, 'peru': 2, 
+    'western_australia': 0, 'alberta': 1, 'kamchatka': 2,
+    'irkutsk': 0, 'mongolia': 1, 'argentina': 2,
+    'wildcard1': 3, 'wildcard2': 3
+}
+
 export const randInt = function(start, end){
     return start + Math.floor(Math.random()*(end - start))
 }
