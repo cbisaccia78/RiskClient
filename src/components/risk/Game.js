@@ -21,7 +21,12 @@ function Game(props){
     const [joined, setJoined] = useState(false)
     const [territoryBoundaries, setTerritoryBoundaries] = useState(null)
     const [localColor, setLocalColor] = useState(null)
-    const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), status: "UNINITIALIZED", queuedAction: {}, players: {playerList: [null,null,null,null,null,null,], turn_stack: [], available_colors: ["blue", "red", "orange", "yellow", "green", "black"],  available_territories: ['eastern_australia', 'indonesia', 'new_guinea', 'alaska', 'ontario', 'northwest_territory', 'venezuela', 'madagascar', 'north_africa', 'greenland', 'iceland', 'great_britain', 'scandinavia', 'japan', 'yakursk', 'kamchatka', 'siberia', 'ural', 'afghanistan', 'middle_east', 'india', 'siam', 'china', 'mongolia', 'irkutsk', 'ukraine', 'southern_europe', 'western_europe', 'northern_europe', 'egypt', 'east_africa', 'congo', 'south_africa', 'brazil', 'argentina', 'eastern_united_states', 'western_united_states', 'quebec', 'central_america', 'peru', 'western_australia', 'alberta'], available_secrets: ["capture Europe, Australia and one other continent","capture Europe, South America and one other continent","capture North America and Africa","capture Asia and South America","capture North America and Australia","capture 24 territories","destroy all armies of a named opponent or, in the case of being the named player oneself, to capture 24 territories","capture 18 territories and occupy each with two troops"]}, deck: {}})
+    const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), status: "UNINITIALIZED", queuedAction: {}, players: {playerList: [null,null,null,null,null,null,], turn_stack: [], 
+        available_colors: ["blue", "red", "orange", "yellow", "green", "black"],  
+        available_territories: ['eastern_australia', 'indonesia', 'new_guinea', 'alaska', 'ontario', 'northwest_territory', 'venezuela', 'madagascar', 'north_africa', 'greenland', 'iceland', 'great_britain', 'scandinavia', 'japan', 'yakursk', 'kamchatka', 'siberia', 'ural', 'afghanistan', 'middle_east', 'india', 'siam', 'china', 'mongolia', 'irkutsk', 'ukraine', 'southern_europe', 'western_europe', 'northern_europe', 'egypt', 'east_africa', 'congo', 'south_africa', 'brazil', 'argentina', 'eastern_united_states', 'western_united_states', 'quebec', 'central_america', 'peru', 'western_australia', 'alberta'],
+        available_secrets: ["capture Europe, Australia and one other continent","capture Europe, South America and one other continent","capture North America and Africa","capture Asia and South America","capture North America and Australia","capture 24 territories","destroy all armies of a named opponent or, in the case of being the named player oneself, to capture 24 territories","capture 18 territories and occupy each with two troops"]},
+        available_territory_cards: ['eastern_australia', 'indonesia', 'new_guinea', 'alaska', 'ontario', 'northwest_territory', 'venezuela', 'madagascar', 'north_africa', 'greenland', 'iceland', 'great_britain', 'scandinavia', 'japan', 'yakursk', 'kamchatka', 'siberia', 'ural', 'afghanistan', 'middle_east', 'india', 'siam', 'china', 'mongolia', 'irkutsk', 'ukraine', 'southern_europe', 'western_europe', 'northern_europe', 'egypt', 'east_africa', 'congo', 'south_africa', 'brazil', 'argentina', 'eastern_united_states', 'western_united_states', 'quebec', 'central_america', 'peru', 'western_australia', 'alberta', 'wildcard1', 'wildcard2'],
+        deck: {}})
     const [lastClicked, setLastClicked] = useState("")
     const [lastHovered, setLastHovered] = useState("")
     const [joinedPosition, setJoinedPosition] = useState(-1)
@@ -325,8 +330,14 @@ function Game(props){
             case 'PLAYER_CHANGE/FORTIFY':{
                 return ret }
             case 'PLAYER_CHANGE/REDEEM':
-                console.log();
-                break
+                _player = s.players.playerList[s.players.turn_stack[0]-1]
+                let diff = new Set(action.territory_cards)
+                let territory_cards = new Set([..._player.territory_cards].filter(card=>!diff.has(card)))
+                player = {..._player, army: _player.army + action.count, territory_cards: territory_cards}
+                let playerList = _.cloneDeep(s.players.playerList)
+                playerList[player.table_position-1] = player
+                ret.players.playerList = playerList
+                return ret
             case 'PLAYER_CHANGE/ATTACK':
                 console.log();
                 break
@@ -350,8 +361,6 @@ function Game(props){
                 break
             case 'PLAYER_CHANGE/ELIMINATOR':
                 break
-            case 'PLAYER_CHANGE/ADD_CARD':
-                break
             case 'PLAYER_CHANGE/SELECT_TERRITORY': {
                 if(!(s.players.available_territories.includes(action.territory))){
                     return ret
@@ -373,8 +382,32 @@ function Game(props){
                 playerList[player.table_position-1] = player
                 ret.players.playerList = playerList
                 return ret }
-            case 'PLAYER_CHANGE/CONQUER_TERRITORY':
-                break
+            case 'PLAYER_CHANGE/CONQUER_TERRITORY':{
+                _player = s.players.playerList[turn_stack[0]-1]
+                let available_territory_cards = _.cloneDeep(s.players.available_territory_cards)
+                let territory_cards = _.cloneDeep(_player.territory_cards)
+                let randIndex = Math.floor(Math.random()*available_territory_cards.length)
+                let randCard = available_territory_cards.splice(randIndex, 1)
+                territory_cards.push(randCard)
+                let territories = _.cloneDeep(_player.territories)
+
+                let prev = territories.get(action.territory)
+                territories.set(action.territory, prev ? prev + action.count : action.count)
+                player = {..._player, army: _player.army - action.count, territories: territories, territory_cards: territory_cards}
+                let playerList = _.cloneDeep(s.players.playerList)
+                playerList[player.table_position-1] = player
+                
+                let _enemy = playerList[action.enemy.table_position-1]
+                let enemyTerritories = _.cloneDeep(_enemy.territories)
+                enemyTerritories.delete(action.territory)
+                let enemy = {..._enemy, territories: enemyTerritories}
+                playerList[action.enemy.table_position-1] = enemy
+                
+                ret.players.playerList = playerList
+                ret.players.available_territory_cards = available_territory_cards
+
+                
+                return ret }
             default:
                 console.log('Unknown action: '+ action);
         } 
