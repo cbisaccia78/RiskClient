@@ -92,7 +92,7 @@ function Game(props){
                             if(gameState.players.available_territories.includes(lastClicked)){
                                 socketManager.send({user_id: user_id, type: 'ACTION', action: {type: 'PLAYER_CHANGE/SELECT_TERRITORY', territory: lastClicked}})
                             }else{
-                                if(gameState.players.playerList[gameState.players.turn_stack[0]-1].territories.has(lastClicked)){
+                                if(gameState.players.playerList[gameState.players.turn_stack[0]-1].territories[lastClicked] != undefined){
                                     socketManager.send({user_id: user_id, type: 'ACTION', action: {type: 'PLAYER_CHANGE/PLACE_ARMIES', territory: lastClicked, count: 1}})
                                 }
                             }
@@ -120,7 +120,7 @@ function Game(props){
                                 case "ATTACK":
                                     let enemy;                                    
                                     gameState.players.playerList.forEach(player=>{
-                                        if(player && player.territories.has(lastClicked)){
+                                        if(player && player.territories[lastClicked] != undefined){
                                             enemy = {table_position: player.table_position}
                                         }
                                     })
@@ -410,12 +410,12 @@ function Game(props){
                 let enemyTerritories = _.cloneDeep(_enemy.territories)
 
                 
-                territories.set(action.fromTerritory, action.fromCount)
+                territories[action.fromTerritory] =  action.fromCount
                 player = {..._player, territories: territories}
                 playerList[player.table_position-1] = player
     
                 
-                enemyTerritories.set(action.toTerritory, action.toCount)
+                enemyTerritories[action.toTerritory] = action.toCount
                 let enemy = {..._enemy, territories: enemyTerritories}
                 playerList[action.enemy.table_position-1] = enemy
                 ret.players.playerList = playerList
@@ -424,9 +424,9 @@ function Game(props){
 
                 _player = s.players.playerList[s.players.turn_stack[0]-1]
                 
-                let prev = _player.territories.get(action.territory)
+                let prev = _player.territories[action.territory]
                 console.log('prev', prev);
-                _player.territories.set(action.territory, prev ? prev + action.count : action.count)
+                _player.territories[action.territory] =  prev ? prev + action.count : action.count
 
                 player = {..._player, army: _player.army - action.count, territories: {..._player.territories}}
                 
@@ -450,9 +450,9 @@ function Game(props){
 
                 _player = s.players.playerList[s.players.turn_stack[0]-1]
                 
-                let prev = _player.territories.get(action.territory)
+                let prev = _player.territories[action.territory]
                 console.log('prev', prev);
-                _player.territories.set(action.territory, prev ? prev + 1 : 1)
+                _player.territories[action.territory] = prev ? prev + 1 : 1
 
                 player = {..._player, army: _player.army - 1, territories: {..._player.territories}}
                 
@@ -470,16 +470,17 @@ function Game(props){
                 territory_cards.push(randCard)
                 let territories = _.cloneDeep(_player.territories)
 
-                let prevFrom = territories.get(action.fromTerritory)
-                let prevTo = territories.get(action.toTerritory)
-                territories.set(action.fromTerritory, prevFrom - action.count)
-                territories.set(action.toTerritory, prevTo + action.count)
+                let prevFrom = territories[action.fromTerritory]
+                let prevTo = territories[action.toTerritory]
+                territories[action.fromTerritory] =  prevFrom - action.count
+                territories[action.toTerritory] =  prevTo + action.count
                 player = {..._player, territories: territories, territory_cards: territory_cards}
                 playerList[player.table_position-1] = player
                 
                 let _enemy = playerList[action.enemy.table_position-1]
                 let enemyTerritories = _.cloneDeep(_enemy.territories)
-                enemyTerritories.delete(action.toTerritory)
+                
+                delete enemyTerritories[action.toTerritory]
                 let enemy = {..._enemy, territories: enemyTerritories}
                 playerList[action.enemy.table_position-1] = enemy
                 

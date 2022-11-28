@@ -123,7 +123,7 @@ function Table(props){
                         <Player key={`player-${player.table_position}`} started={props.started} extraClasses={modified ? "covered" : ""} setTimerExpired={props.setTimerExpired} totalTime={props.totalTime} data={player} generatePosition={playerPosition.bind(this, player.table_position)}/>
                         {modified ? <Timer key={`timer-${props.turn}`} position={player.table_position} generatePosition={playerPosition.bind(this, player.table_position)} totalTime={120} setTimerExpired={props.setTimerExpired}/> : <></>}
                         {modified && props.status=="POST_SETUP" ? <TerritoryCards territory_cards={player.territory_cards} redeemAction={props.redeemAction}/> : <></>}
-                        {props.started ? Array.from(player.territories.size ? player.territories.entries() : {}).map(function(territory){return <ArmyCount board={props.tableRef} color={player.color} count={territory[1]} territory={territory[0]}/>}) : <></>}
+                        {props.started ? (Object.keys(player.territories).length ? Object.entries(player.territories) : []).map(function(territory){return <ArmyCount board={props.tableRef} color={player.color} count={territory[1]} territory={territory[0]}/>}) : <></>}
                         {/*<Hand key={`hand-${player.position}`} hand={player.hand} playerPos={player.position} cardPosition={cardPosition}/>*/}
                     </>)
                 })
