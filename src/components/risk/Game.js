@@ -42,7 +42,7 @@ function Game(props){
     useEffect(function(){
         const establishConnection = async function(){
             if(joined){
-                let action = {type: "JOIN", user_id: authctx.id, player: { color: localColor,  icon: authctx.profilePicBuffer, table_position: joinedPosition, territories: new Map()}}
+                let action = {type: "JOIN", user_id: authctx.id, player: { color: localColor,  icon: authctx.profilePicBuffer, table_position: joinedPosition, territories: {}}}
                 socketManager.send(action)
             }
         }
@@ -293,7 +293,7 @@ function Game(props){
                     const numInfantry = 40 - (prevState.players.turn_stack.length - 2)*5
                     
                     const secretIndex = Math.floor(Math.random()*available_secrets.length)
-                    const _player = {...player, army: numInfantry, territories: new Map(), secretMission: available_secrets.splice(secretIndex, 1), territory_cards: new Set()}
+                    const _player = {...player, army: numInfantry, territories: {}, secretMission: available_secrets.splice(secretIndex, 1), territory_cards: new Set()}
                     playerList[player.table_position-1] = _player
                 })
                 
@@ -418,7 +418,7 @@ function Game(props){
                 enemyTerritories.set(action.toTerritory, action.toCount)
                 let enemy = {..._enemy, territories: enemyTerritories}
                 playerList[action.enemy.table_position-1] = enemy
-                ret.playerList = playerList
+                ret.players.playerList = playerList
                 return ret}
             case 'PLAYER_CHANGE/PLACE_ARMIES': {
 
@@ -428,7 +428,7 @@ function Game(props){
                 console.log('prev', prev);
                 _player.territories.set(action.territory, prev ? prev + action.count : action.count)
 
-                player = {..._player, army: _player.army - action.count, territories: new Map(_player.territories)}
+                player = {..._player, army: _player.army - action.count, territories: {..._player.territories}}
                 
                 let playerList = _.cloneDeep(s.players.playerList)
                 
@@ -454,7 +454,7 @@ function Game(props){
                 console.log('prev', prev);
                 _player.territories.set(action.territory, prev ? prev + 1 : 1)
 
-                player = {..._player, army: _player.army - 1, territories: new Map(_player.territories)}
+                player = {..._player, army: _player.army - 1, territories: {..._player.territories}}
                 
                 let playerList = _.cloneDeep(s.players.playerList)
                 
