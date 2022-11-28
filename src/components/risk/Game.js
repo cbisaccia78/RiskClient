@@ -10,7 +10,7 @@ import { Fragment } from "react";
 import JoinForm from "../UI/JoinForm";
 import {insertTurn, deleteTurn} from '../../helpers/helpers'
 import {socketManager} from "../../helpers/SocketManager";
-import _ from "lodash"
+import _, { extendWith } from "lodash"
 
 
 
@@ -22,6 +22,7 @@ function Game(props){
     const [territoryBoundaries, setTerritoryBoundaries] = useState(null)
     const [localColor, setLocalColor] = useState(null)
     const [queuedAction, setQueuedAction] = useState({type: "NONE"})
+    const [conquerWindow, setConquerWindow] = useState({type: "NONE"})
     const [localActionHistory, setLocalActionHistory] = useState([])
     const [gameState, dispatchState] = useReducer(stateReducer, { id: joined ? 0 : useLoaderData(), status: "UNINITIALIZED", queuedAction: {}, players: {playerList: [null,null,null,null,null,null,], turn_stack: [], 
         available_colors: ["blue", "red", "orange", "yellow", "green", "black"],  
@@ -99,12 +100,23 @@ function Game(props){
                         case "POST_SETUP":
                             switch(queuedAction.type){
                                 case "NONE":
-                                    if(!localActionHistory.includes("PLACE_ARMIES")){
-                                        
+                                    if(!(localActionHistory.includes("PLACE_ARMIES"))){ //this only detects one instance of placing armies. need it to detect when all instances are finished
+                                        setQueuedAction({type: "PLACE_ARMIES"})
                                     }else{
                                         setQueuedAction({type: "ATTACK", fromTerritory: lastClicked})
                                     }
-                                    
+                                    break
+                                case "PLACE_ARMIES":
+                                    debugger
+                                    if(gameState.players.playerList[gameState.players.turn_stack[0] - 1].army){
+                                        socketManager.send({user_id: user_id, type: 'ACTION', action: {type: 'PLAYER_CHANGE/PLACE_ARMIES', territory: lastClicked, count: 1}})
+                                    }else{
+                                        let lAH = _.cloneDeep(localActionHistory)
+                                        lAH.push("PLACE_ARMIES")
+                                        setLocalActionHistory(lAH)
+                                        setQueuedAction({type: "NONE"})
+                                    }
+                                    break
                                 case "ATTACK":
                                     let enemy;                                    
                                     gameState.players.playerList.forEach(player=>{
@@ -112,9 +124,14 @@ function Game(props){
                                             enemy = {table_position: player.table_position}
                                         }
                                     })
+                                    if(!enemy){
+                                        console.log("Error, enemy null");
+                                        return
+                                    }
                                     socketManager.send(
                                         {
                                             user_id: user_id, type: 'ACTION', 
+                                            server_action: true,
                                             action: {
                                                 type: 'PLAYER_CHANGE/ATTACK', 
                                                 fromTerritory: queuedAction.fromTerritory,
@@ -125,8 +142,11 @@ function Game(props){
                                     )
                                     let lAH = _.cloneDeep(localActionHistory)
                                     lAH.push("ATTACK")
-                                    setLocalActionHistory()
+                                    setLocalActionHistory(lAH)
                                     setQueuedAction({type: "NONE"})
+                                    break
+                                default:
+                                    break
                             }
                             break
                         default:
@@ -167,6 +187,13 @@ function Game(props){
             //tableRef.current.children['gameSVG'].contentWindow.removeEventListener('mousemove', moveDetected)
         }
     }, [territoryBoundaries, lastClicked, lastHovered])
+
+    useEffect(function(){
+        if(conquerWindow.type == "NONE"){
+            return
+        }
+        console.log(conquerWindow);
+    }, [conquerWindow])
 
     useEffect(function(){
         const resizeHandler = function(){
@@ -275,6 +302,9 @@ function Game(props){
                 return {...prevState, status: action.status}
             case 'DECK/SHUFFLE':
                 return prevState
+            case 'UI/CONQUER_TERRITORY':{
+                setConquerWindow({...action})
+            }
             case 'DECK/DEAL':
                 return prevState
             case 'ACTION':
@@ -372,62 +402,20 @@ function Game(props){
                 return ret
             case 'PLAYER_CHANGE/ATTACK':{
                 let playerList = _.cloneDeep(s.players.playerList)
-                _player = playerList[turn_stack[0]-1]
+                _player = playerList[s.players.turn_stack[0]-1]
                 let territories = _.cloneDeep(_player.territories)
-                let prevPlayerCount = territories.get(action.fromTerritory)
-    
+
+                //debugger
                 let _enemy = playerList[action.enemy.table_position-1]
                 let enemyTerritories = _.cloneDeep(_enemy.territories)
-                let prevEnemyCount = enemyTerritories.get(action.toTerritory)
+
                 
-                let playerRoll = [], enemyRoll = []
-                var playerLost = 0, enemyLost = 0
-                if(prevPlayerCount >= 3){
-                    playerRoll.push(Math.floor(Math.random()*6 + 1))
-                    playerRoll.push(Math.floor(Math.random()*6 + 1))
-                    playerRoll.push(Math.floor(Math.random()*6 + 1))
-                }else if(prevPlayerCount == 2){
-                    playerRoll.push(Math.floor(Math.random()*6 + 1))
-                    playerRoll.push(Math.floor(Math.random()*6 + 1))
-                }else{
-                    console.log("Cannot attack with less than 2 troops");
-                    return {...state}
-                }
-    
-                if(prevEnemyCount >= 2){
-                    enemyRoll.push(Math.floor(Math.random()*6 + 1))
-                    enemyRoll.push(Math.floor(Math.random()*6 + 1))
-                }else if(prevEnemyCount == 1){
-                    enemyRoll.push(Math.floor(Math.random()*6 + 1))
-                }else {
-                    return {...state}
-                }
-    
-                playerRoll.sort((a,b)=>b-a)
-                enemyRoll.sort((a,b)=>b-a)
-                
-                if(enemyRoll[0] >= playerRoll[0]){
-                    playerLost++
-                }else{
-                    enemyLost++
-                }
-    
-                if(prevEnemyCount > 1){
-                    if(enemyRoll[1] >= playerRoll[1]){
-                        playerLost++
-                    }else{
-                        enemyLost++
-                    }
-                }
-                
-                
-                territories.set(action.fromTerritory, prevPlayerCount - playerLost ? prevPlayerCount - playerLost : 1)
+                territories.set(action.fromTerritory, action.fromCount)
                 player = {..._player, territories: territories}
                 playerList[player.table_position-1] = player
     
                 
-                
-                enemyTerritories.set(action.toTerritory, prevEnemyCount - enemyLost)
+                enemyTerritories.set(action.toTerritory, action.toCount)
                 let enemy = {..._enemy, territories: enemyTerritories}
                 playerList[action.enemy.table_position-1] = enemy
                 ret.playerList = playerList
@@ -474,7 +462,7 @@ function Game(props){
                 ret.players.playerList = playerList
                 return ret }
             case 'PLAYER_CHANGE/CONQUER_TERRITORY':{
-                _player = s.players.playerList[turn_stack[0]-1]
+                _player = s.players.playerList[s.players.turn_stack[0]-1]
                 let available_territory_cards = _.cloneDeep(s.players.available_territory_cards)
                 let territory_cards = _.cloneDeep(_player.territory_cards)
                 let randIndex = Math.floor(Math.random()*available_territory_cards.length)
@@ -500,6 +488,7 @@ function Game(props){
 
                 
                 return ret }
+            
             default:
                 console.log('Unknown action: '+ action);
         } 
