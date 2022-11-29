@@ -10,6 +10,7 @@ import { Fragment } from "react";
 import JoinForm from "../UI/JoinForm";
 import {insertTurn, deleteTurn} from '../../helpers/helpers'
 import {socketManager} from "../../helpers/SocketManager";
+import { DEVELOPMENT } from "../../config";
 import _, { extendWith } from "lodash"
 
 
@@ -256,7 +257,7 @@ function Game(props){
         let ts = gameState.players.turn_stack
         let turn = ts.length ? ts[0] : 0
         if(timerExpired && turn == joinedPosition){
-            socketManager.send({type: "ACTION", user_id: authctx.id, action: {type: "NOOP"}})
+            socketManager.send({type: "ACTION", user_id: authctx.id, action: {type: "TURN_CHANGE"}})
         }
     }, [timerExpired])
 
@@ -291,12 +292,10 @@ function Game(props){
                 const available_secrets = _.cloneDeep(prevState.players.available_secrets)
                 playerList.filter(player=>player != null).forEach(function(player){
                     const numInfantry = 40 - (prevState.players.turn_stack.length - 2)*5
-                    
                     const secretIndex = Math.floor(Math.random()*available_secrets.length)
                     const _player = {...player, army: numInfantry, territories: {}, secretMission: available_secrets.splice(secretIndex, 1), territory_cards: new Set()}
                     playerList[player.table_position-1] = _player
                 })
-                
                 return {...prevState, players: {...prevState.players, playerList: playerList, available_secrets: available_secrets}}
             case 'STATUS/SET':
                 return {...prevState, status: action.status}
@@ -527,8 +526,8 @@ function Game(props){
         socketManager.send({type: "START", user_id: authctx.id})
     }
 
-    const noOp = function(){
-        socketManager.send({type: "ACTION", user_id: authctx.id, action: {type: "NOOP"}})
+    const turnChange = function(){
+        socketManager.send({type: "ACTION", user_id: authctx.id, action: {type: "TURN_CHANGE"}})
     }
 
     const redeemAction = function(){
@@ -588,10 +587,10 @@ function Game(props){
     return (
         <Fragment>
             <div className={classes.gameBackground} id="table-background">
-                {/*gameState.status != "UNINITIALIZED" && joinedPosition == turn ?
-                <Button onClick={noOp.bind(this)}>NOOP</Button>
+                {gameState.status == "POST_SETUP" && joinedPosition == turn ?
+                <Button onClick={turnChange.bind(this)}>END TURN</Button>
                   
-                : <></>*/}
+                : <></>}
                 {gameState.status == "UNINITIALIZED" && joined ? <Button variant="success" onClick={startGame}>Start Game</Button> : <></>}
                 <Table tableRef={tableRef} calculateTerritoryBoundaries={calculateTerritoryBoundaries} players={gameState.players.playerList} started={gameState.status != "UNINITIALIZED"} turn={turn} setTimerExpired={setTimerExpired} totalTime={120} joined={joined} joinClickHandler={joinClickHandler} setJoinedPosition={setJoinedPosition} status={gameState.status} redeemAction={redeemAction}>
                 </Table>
